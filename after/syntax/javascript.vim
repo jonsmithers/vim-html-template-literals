@@ -8,10 +8,8 @@ if exists('s:current_syntax')
 endif
 
 syntax region litHtmlRegion
-  \ contains=@XMLSyntax
+  \ contains=@XMLSyntax,jsTemplateExpression
   \ skip=+\\`+ 
   \ start=+html`+
   \ end=+`+
 syn cluster jsExpression add=litHtmlRegion
-" Allow litHtmlRegion to contain reserved words.
-syn cluster javascriptNoReserved add=litHtmlRegion
