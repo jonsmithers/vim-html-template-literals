@@ -1,0 +1,1 @@
+Requires pangloss/vim-javascript
