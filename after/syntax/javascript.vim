@@ -1,4 +1,6 @@
-" Add xml highlighting inside html`...` expressions
+" Description: Vim lit-html syntax file
+" Language: JavaScript
+" Maintainer: Jon Smithers <mail@jonsmithers.link>
 
 if exists('b:current_syntax')
   let s:current_syntax=b:current_syntax
@@ -29,8 +31,8 @@ if exists('s:current_syntax')
 endif
 
 syntax region litHtmlStyleTag contained
-  \ contains=@CSSSyntax
-  \ start=+ <style>+
+  \ contains=@CSSSyntax,xmlTag,xmlEndTag
+  \ start=+ <style+
   \ end=+</style>+
   \ keepend
   " this space in front of "<style>" is a hack to get priority over xml

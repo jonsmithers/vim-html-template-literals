@@ -1,12 +1,9 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Vim indent file
-"
-" Copied from https://github.com/mxw/vim-jsx/blob/master/after/indent/jsx.vim
-"
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Description: Vim lit-html indent file
+" Language: JavaScript
+" Maintainer: Jon Smithers <mail@jonsmithers.link>
 
 " Save the current JavaScript indentexpr.
-let b:lithtml_original_indent_expr = &indentexpr
+let b:litHtmlOriginalIndentExpression = &indentexpr
 
 " import xml indent
 if exists('b:did_indent')
@@ -34,6 +31,8 @@ setlocal indentexpr=GetLitHtmlIndent()
 setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
 " XML indentkeys
 setlocal indentkeys+=*<Return>,<>>,<<>,/
+" lit-html indentkeys
+setlocal indentkeys+=`
 
 " Multiline end tag regex (line beginning with '>' or '/>')
 let s:endtag = '^\s*\/\?>\s*;\='
@@ -68,24 +67,39 @@ fu! IsSynstackInsideJsx(synstack)
   return v:false
 endfu
 
-" Dispatch to indent method for js/html/css
+" Dispatch to indent method for js/html/css, then make minor corrections
 fu! GetLitHtmlIndent()
-  let l:cursyn  = SynSOL(v:lnum)
-  let l:prevsyn = SynEOL(v:lnum - 1)
+  let l:currLineSynstack = SynEOL(v:lnum)
+  let l:prevLineSynstack = SynEOL(v:lnum - 1)
 
-  if (IsSynstackXml(l:cursyn) && !IsSynstackInsideJsx(l:cursyn))
-    let l:ind = XmlIndentGet(v:lnum, 0)
-  elseif (IsSyntaxCss(l:cursyn))
-    let l:ind = GetCSSIndent()
+  if (IsSynstackXml(l:currLineSynstack) && !IsSynstackInsideJsx(l:currLineSynstack))
+
+    let l:indent = XmlIndentGet(v:lnum, 0)
+
+    " indent first line inside lit-html template
+    if getline(v:lnum-1) =~# 'html`$'
+      let l:indent += &shiftwidth
+    endif
+
+  elseif (IsSyntaxCss(l:currLineSynstack))
+
+    let l:indent = GetCSSIndent()
+
+    " indent first line of css after <script>
+    if (IsSynstackXml(l:prevLineSynstack))
+      let l:indent += &shiftwidth
+    endif
+
   else
-    if len(b:lithtml_original_indent_expr)
-      " Invoke the base JS package's custom indenter.  (For vim-javascript,
-      " e.g., this will be GetJavascriptIndent().)
-      let l:ind = eval(b:lithtml_original_indent_expr)
+    if len(b:litHtmlOriginalIndentExpression)
+      let l:indent = eval(b:litHtmlOriginalIndentExpression)
+      if (IsSynstackXml(l:prevLineSynstack))
+        let l:indent -= &shiftwidth
+      endif
     else
-      let l:ind = cindent(v:lnum)
+      let l:indent = cindent(v:lnum)
     endif
   endif
 
-  return l:ind
+  return l:indent
 endfu
