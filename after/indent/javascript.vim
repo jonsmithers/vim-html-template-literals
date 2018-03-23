@@ -18,7 +18,7 @@ if exists('s:did_indent')
   let b:did_indent=s:did_indent
 endif
 
-setlocal indentexpr=GetJsxIndent()
+setlocal indentexpr=GetLitHtmlIndent()
 
 " JS indentkeys
 setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
@@ -76,7 +76,7 @@ fu! SynJSXContinues(cursyn, prevsyn)
 endfu
 
 " Cleverly mix JS and XML indentation.
-fu! GetJsxIndent()
+fu! GetLitHtmlIndent()
   let l:cursyn  = SynSOL(v:lnum)
   let l:prevsyn = SynEOL(v:lnum - 1)
 
