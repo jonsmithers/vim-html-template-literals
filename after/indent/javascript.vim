@@ -51,7 +51,7 @@ fu! SynEOL(lnum)
 endfu
 
 fu! IsSyntaxCss(synstack)
-  return get(a:synstack, -1) =~# '^css'
+  return get(a:synstack, -1) =~# '^css' || get(a:synstack, -1) =~# '^litHtmlStyleTag$'
 endfu
 
 " Does synstack end with an xml syntax attribute
@@ -59,14 +59,23 @@ fu! IsSynstackXml(synstack)
   return get(a:synstack, -1) =~# '^xml'
 endfu
 
+fu! IsSynstackInsideJsx(synstack)
+  for l:syntaxAttribute in reverse(a:synstack)
+    if (l:syntaxAttribute =~# '^jsx')
+      return v:true
+    endif
+  endfor
+  return v:false
+endfu
+
 " Dispatch to indent method for js/html/css
 fu! GetLitHtmlIndent()
   let l:cursyn  = SynSOL(v:lnum)
   let l:prevsyn = SynEOL(v:lnum - 1)
 
-  if (IsSynstackXml(l:prevsyn))
+  if (IsSynstackXml(l:cursyn) && !IsSynstackInsideJsx(l:cursyn))
     let l:ind = XmlIndentGet(v:lnum, 0)
-  elseif (IsSyntaxCss(l:prevsyn))
+  elseif (IsSyntaxCss(l:cursyn))
     let l:ind = GetCSSIndent()
   else
     if len(b:lithtml_original_indent_expr)

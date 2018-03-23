@@ -10,7 +10,7 @@ if exists('s:current_syntax')
 endif
 
 syntax region litHtmlRegion
-  \ contains=@XMLSyntax,jsTemplateExpression,htmlStyleTag
+  \ contains=@XMLSyntax,jsTemplateExpression,litHtmlStyleTag
   \ skip=+\\`+ 
   \ start=+html`+
   \ end=+`+
@@ -28,7 +28,7 @@ if exists('s:current_syntax')
   let b:current_syntax=s:current_syntax
 endif
 
-syntax region htmlStyleTag contained
+syntax region litHtmlStyleTag contained
   \ contains=@CSSSyntax
   \ start=+ <style>+
   \ end=+</style>+
