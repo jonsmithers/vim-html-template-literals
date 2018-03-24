@@ -35,8 +35,8 @@ endif
 
 syntax region litHtmlStyleTag contained
   \ contains=@CSSSyntax,xmlTag,xmlEndTag
-  \ start=+ <style+
+  \ start=+\s<style+
   \ end=+</style>+
   \ keepend
-  " this space in front of "<style>" is a hack to get priority over xml
-  " xmlTagName (see :help syn-priority)
+  " The space in front of "<style>" is a hack to get priority over xmlTagName
+  " (see :help syn-priority)
