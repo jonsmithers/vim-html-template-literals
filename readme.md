@@ -15,8 +15,8 @@ This plugin requires
 installation looks like this:
 
 ```vim
-Plug jonsmithers/experimental-lit-html-vim
-Plug pangloss/vim-javascript
+Plug 'jonsmithers/experimental-lit-html-vim'
+Plug 'pangloss/vim-javascript'
 ```
 
 Note that this plugin conflicts a bit with vim-jsx. If you have it installed,
