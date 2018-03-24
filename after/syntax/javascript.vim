@@ -16,6 +16,7 @@ syntax region litHtmlRegion
   \ skip=+\\`+ 
   \ start=+html`+
   \ end=+`+
+  \ keepend
 syn cluster jsExpression add=litHtmlRegion
 
 " allow js interpolation (${...}) inside xml strings 
