@@ -18,6 +18,8 @@ syntax region litHtmlRegion
   \ end=+`+
 syn cluster jsExpression add=litHtmlRegion
 
+" allow js interpolation (${...}) inside xml strings 
+syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=xmlString
 
 " Add css highlighting inside <style> tags
 
