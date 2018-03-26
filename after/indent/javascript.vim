@@ -72,14 +72,18 @@ fu! GetLitHtmlIndent()
   let l:currLineSynstack = SynEOL(v:lnum)
   let l:prevLineSynstack = SynEOL(v:lnum - 1)
 
+  if getline(v:lnum-1) =~# '\<html`\s*$'
+    let l:indent = len(matchstr(getline(v:lnum-1), '^\s*'))
+    if (!(getline(v:lnum) =~# '`;\?$'))
+      " indent first line inside lit-html template
+      let l:indent += &shiftwidth
+    endif
+    return l:indent
+  endif
+
   if (IsSynstackXml(l:currLineSynstack) && !IsSynstackInsideJsx(l:currLineSynstack))
 
     let l:indent = XmlIndentGet(v:lnum, 0)
-
-    " indent first line inside lit-html template
-    if getline(v:lnum-1) =~# 'html`$'
-      let l:indent += &shiftwidth
-    endif
 
   elseif (IsSyntaxCss(l:currLineSynstack))
 
