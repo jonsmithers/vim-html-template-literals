@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [[ ! -d ~/.vim/plugged/vader.vim ]]; then
+    echo "Can't find Vader.vim"
+    exit 1
+fi
+if [[ ! -d ~/.vim/plugged/vim-html-template-literals ]]; then
+    echo "Can't find vim-html-template-literals"
+    exit 1
+fi
+
+vim -Nu <(cat << EOF
+filetype off
+set rtp+=~/.vim/plugged/vader.vim
+set rtp+=~/.vim/plugged/vim-html-template-literals
+filetype plugin indent on
+syntax enable
+EOF) +Vader*
