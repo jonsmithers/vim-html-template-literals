@@ -10,9 +10,9 @@ Do:
 
 Expect javascript:
   html`
-          <div>
-                  <div> </div>
-          </div>
+  	<div>
+  		<div> </div>
+  	</div>
   `;
 
 
@@ -29,9 +29,9 @@ Do:
 
 Expect javascript:
   html`
-          <div>
-                  simple text
-          </div>
+  	<div>
+  		simple text
+  	</div>
   `;
 
 Given javascript (nested css):
@@ -52,26 +52,25 @@ Given javascript (nested css):
   <paper-button></paper-button>
   </div>
   `
-  `;
 
 Do:
   =G
 
 Expect javascript:
   html`
-          <div></div>
-          <style inlcude="module">
-                  element {
-                          background: green;
-                  }
-                  .class {
-                          border: red;
-                  }
-                  #id {
-                          opacity: 0.5
-                  }
-          </style>
-          <div>
-                  <paper-button></paper-button>
-          </div>
+  	<div></div>
+  	<style inlcude="module">
+  		element {
+  			background: green;
+  		}
+  		.class {
+  			border: red;
+  		}
+  		#id {
+  			opacity: 0.5
+  		}
+  	</style>
+  	<div>
+  		<paper-button></paper-button>
+  	</div>
   `
