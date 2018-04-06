@@ -25,7 +25,7 @@ if exists('s:did_indent')
   let b:did_indent=s:did_indent
 endif
 
-setlocal indentexpr=GetLitHtmlIndent()
+setlocal indentexpr=ComputeLitHtmlIndent()
 
 " JS indentkeys
 setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
@@ -59,7 +59,7 @@ fu! IsSynstackXml(synstack)
 endfu
 
 fu! IsSynstackInsideJsx(synstack)
-  for l:syntaxAttribute in reverse(a:synstack)
+  for l:syntaxAttribute in reverse(copy((a:synstack)))
     if (l:syntaxAttribute =~# '^jsx')
       return v:true
     endif
@@ -67,43 +67,49 @@ fu! IsSynstackInsideJsx(synstack)
   return v:false
 endfu
 
-" Dispatch to indent method for js/html/css, then make minor corrections
-fu! GetLitHtmlIndent()
+" Dispatch to indent method for js/html/css (use custom rules for transitions
+" between syntaxes)
+fu! ComputeLitHtmlIndent()
   let l:currLineSynstack = SynEOL(v:lnum)
   let l:prevLineSynstack = SynEOL(v:lnum - 1)
 
-  if getline(v:lnum-1) =~# '\<html`\s*$'
-    let l:indent = len(matchstr(getline(v:lnum-1), '^\s*'))
-    if (!(getline(v:lnum) =~# '`;\?$'))
+  let l:wasTemplateStart = (getline(v:lnum-1) =~# '\<html`\s*$')
+  if l:wasTemplateStart
+    let l:indent = indent(v:lnum-1)
+    let l:isTemplateEnd = (getline(v:lnum) =~# '^\s*`')
+    if !l:isTemplateEnd
       " indent first line inside lit-html template
       let l:indent += &shiftwidth
     endif
     return l:indent
   endif
 
-  if (IsSynstackXml(l:currLineSynstack) && !IsSynstackInsideJsx(l:currLineSynstack))
-
-    let l:indent = XmlIndentGet(v:lnum, 0)
-
-  elseif (IsSyntaxCss(l:currLineSynstack))
-
-    let l:indent = GetCSSIndent()
-
-    " indent first line of css after <script>
-    if (IsSynstackXml(l:prevLineSynstack))
-      let l:indent += &shiftwidth
-    endif
-
-  else
-    if len(b:litHtmlOriginalIndentExpression)
-      let l:indent = eval(b:litHtmlOriginalIndentExpression)
-      if (IsSynstackXml(l:prevLineSynstack))
-        let l:indent -= &shiftwidth
-      endif
+  let l:wasXml = (IsSynstackXml(l:prevLineSynstack))
+  let l:isXml  = (IsSynstackXml(l:currLineSynstack))
+  let l:isJsx  = (IsSynstackInsideJsx(l:currLineSynstack))
+  if (l:wasXml || l:isXml) && !l:isJsx
+    let l:isTemplateEnd = (getline(v:lnum) =~# '^\s*`')
+    if !l:isTemplateEnd
+      return XmlIndentGet(v:lnum, 0)
     else
-      let l:indent = cindent(v:lnum)
+      " assume still on xml
+      let l:indent = indent(v:lnum-1)
+      echom l:indent
+      echom &shiftwidth
+      let l:indent -= &shiftwidth
+      return l:indent
     endif
   endif
 
-  return l:indent
+  let l:isCss = (IsSyntaxCss(l:currLineSynstack))
+  if l:isCss
+    return GetCSSIndent()
+  endif
+
+
+  if len(b:litHtmlOriginalIndentExpression)
+    return eval(b:litHtmlOriginalIndentExpression)
+  else
+    return cindent(v:lnum)
+  endif
 endfu
