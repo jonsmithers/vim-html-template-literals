@@ -1,0 +1,76 @@
+Given javascript (nested xml tags):
+  html`
+  <div>
+  <div> </div>
+  </div>
+  `;
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+  	<div>
+  		<div> </div>
+  	</div>
+  `;
+
+
+
+Given javascript (simple text on a separate line):
+  html`
+    <div>
+    simple text
+    </div>
+    `;
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+  	<div>
+  		simple text
+  	</div>
+  `;
+
+Given javascript (nested css):
+  html`
+  <div></div>
+  <style inlcude="module">
+  element {
+    background: green;
+  }
+  .class {
+    border: red;
+  }
+  #id {
+  opacity: 0.5
+  }
+  </style>
+  <div>
+  <paper-button></paper-button>
+  </div>
+  `
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+  	<div></div>
+  	<style inlcude="module">
+  		element {
+  			background: green;
+  		}
+  		.class {
+  			border: red;
+  		}
+  		#id {
+  			opacity: 0.5
+  		}
+  	</style>
+  	<div>
+  		<paper-button></paper-button>
+  	</div>
+  `
