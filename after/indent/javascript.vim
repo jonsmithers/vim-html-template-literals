@@ -67,6 +67,18 @@ fu! IsSynstackInsideJsx(synstack)
   return v:false
 endfu
 
+fu! VHTL_GetBracketDepth(str)
+  let l:depth=0
+  for l:char in split(a:str, '\zs')
+    if (l:char ==# '{')
+      let l:depth += 1
+    elseif (l:char ==# '}')
+      let l:depth -=1
+    endif
+  endfor
+    return l:depth
+endfu
+
 " Dispatch to indent method for js/html/css (use custom rules for transitions
 " between syntaxes)
 fu! ComputeLitHtmlIndent()
@@ -88,16 +100,16 @@ fu! ComputeLitHtmlIndent()
   let l:isXml  = (IsSynstackXml(l:currLineSynstack))
   let l:isJsx  = (IsSynstackInsideJsx(l:currLineSynstack))
   if (l:wasXml || l:isXml) && !l:isJsx
-    let l:isTemplateEnd = (getline(v:lnum) =~# '^\s*`')
+    let l:isTemplateEnd      = (getline(v:lnum) =~# '^\s*`')
+    let l:wasJsExpressionEnd = !IsSyntaxCss(l:prevLineSynstack) && (VHTL_GetBracketDepth(getline(v:lnum-1)) == -1)
     if !l:isTemplateEnd
-      return XmlIndentGet(v:lnum, 0)
-    else
-      " assume still on xml
-      let l:indent = indent(v:lnum-1)
-      echom l:indent
-      echom &shiftwidth
-      let l:indent -= &shiftwidth
+      let l:indent = XmlIndentGet(v:lnum, 0)
+      if l:wasJsExpressionEnd
+        let l:indent -= &shiftwidth
+      endif
       return l:indent
+    else
+      return indent(v:lnum-1) - &shiftwidth
     endif
   endif
 
