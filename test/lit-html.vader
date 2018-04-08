@@ -74,3 +74,46 @@ Expect javascript:
   		<paper-button></paper-button>
   	</div>
   `
+
+Given javascript (lit-html readme examples):
+  const render = () => html`
+  ${when(state === 'loading',
+  html`<div>Loading...</div>`,
+  html`<p>${message}</p>`)}
+  `;
+  const render = () => html`
+  <ul>
+  ${repeat(items, (i) => i.id, (i, index) => html`
+  <li>${index}: ${i.name}</li>`)}
+  </ul>
+  `;
+  const render = () => html`
+  <p>
+  ${until(
+  fetch('content.txt').then((r) => r.text()),
+  html`<span>Loading...</span>`)}
+  </p>
+  `;
+
+Do:
+  =G
+
+Expect javascript:
+  const render = () => html`
+  	${when(state === 'loading',
+  		html`<div>Loading...</div>`,
+  		html`<p>${message}</p>`)}
+  `;
+  const render = () => html`
+  	<ul>
+  		${repeat(items, (i) => i.id, (i, index) => html`
+  			<li>${index}: ${i.name}</li>`)}
+  	</ul>
+  `;
+  const render = () => html`
+  	<p>
+  		${until(
+  			fetch('content.txt').then((r) => r.text()),
+  			html`<span>Loading...</span>`)}
+  	</p>
+  `;
