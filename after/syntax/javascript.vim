@@ -13,10 +13,12 @@ endif
 
 syntax region litHtmlRegion
   \ contains=@XMLSyntax,jsTemplateExpression,litHtmlStyleTag
-  \ skip=+\\`+ 
   \ start=+html`+
+  \ skip=+\\`+
   \ end=+`+
+  \ extend
   \ keepend
+  " \ skip=+\(\\\|html\)`+
 syn cluster jsExpression add=litHtmlRegion
 
 " allow js interpolation (${...}) inside xml strings 
