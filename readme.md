@@ -19,6 +19,10 @@ Plug 'jonsmithers/experimental-lit-html-vim'
 Plug 'pangloss/vim-javascript'
 ```
 
-Note that the auto-indent functionality his quite a few flaws and probably
-needs to be rewritten. Also, this plugin conflicts a bit with vim-jsx. If you
-have it installed, you may experience more undesirable indentation behavior.
+## Known Issues
+
+- The indentation logic still has some kinks.
+  <!-- The boundaries between js and html (``html`...` `` and `${...}`) are
+  rather tricky. -->
+- This plugin conflicts a bit with vim-jsx. Having both installed
+  simultaneously may result in undesired indentation behaviors.
