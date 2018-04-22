@@ -163,10 +163,15 @@ endfu
 " Dispatch to indent method for js/html/css (use custom rules for transitions
 " between syntaxes)
 fu! ComputeLitHtmlIndent()
+
+  " get most recent non-empty line
+  let l:prev_lnum = v:lnum - 1
+  while (v:lnum > 1 && -1 != match(getline(l:prev_lnum), '^\s*$'))
+    let l:prev_lnum -= 1
+  endwhile
+
   let l:currLineSynstack = SynEOL(v:lnum)
-  let l:prevLineSynstack = SynEOL(v:lnum - 1)
-  " TODO need to handle empty lines. Currently I assume there are no blank
-  " lines.
+  let l:prevLineSynstack = SynEOL(l:prev_lnum)
 
   if (!VHTL_isSynstackInsideLitHtml(l:currLineSynstack) && !VHTL_isSynstackInsideLitHtml(l:prevLineSynstack))
     call VHTL_debug('outside of litHtmlRegion')
@@ -182,11 +187,13 @@ fu! ComputeLitHtmlIndent()
   " This algorithm does not always work and must be rewritten (hopefully to
   " something simpler)
   let l:adjustForClosingBracket = 0
-  if (!l:wasCss && VHTL_getBracketDepthChange(getline(v:lnum - 1)) < 0)
-    :normal! 0[{
-    let l:openingBracketLine = getline(line('.'))
-    if (!VHTL_opensTemplate(l:openingBracketLine))
+  if (!l:wasCss && VHTL_getBracketDepthChange(getline(l:prev_lnum)) < 0)
+    :exec 'normal! ' . l:prev_lnum . 'G0[{'
+    let l:lineWithOpenBracket = getline(line('.'))
+    echom l:lineWithOpenBracket
+    if (!VHTL_opensTemplate(l:lineWithOpenBracket))
       call VHTL_debug('adjusting for close bracket')
+      echom "hi/"
       let l:adjustForClosingBracket = - &shiftwidth
     endif
   endif
@@ -196,14 +203,14 @@ fu! ComputeLitHtmlIndent()
   " closers can be balanced out by template openers.
   if (VHTL_startsWithTemplateEnd(v:lnum))
     call VHTL_debug('closed template at start ' . l:adjustForClosingBracket)
-    return indent(v:lnum-1) - &shiftwidth + l:adjustForClosingBracket
+    return indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
   endif
-  if (VHTL_opensTemplate(getline(v:lnum-1)))
+  if (VHTL_opensTemplate(getline(l:prev_lnum)))
     call VHTL_debug('opened template')
-    return indent(v:lnum-1) + &shiftwidth
-  elseif (VHTL_closesTemplate(getline(v:lnum-1)) && !VHTL_startsWithTemplateEnd(v:lnum-1))
+    return indent(l:prev_lnum) + &shiftwidth
+  elseif (VHTL_closesTemplate(getline(l:prev_lnum)) && !VHTL_startsWithTemplateEnd(l:prev_lnum))
     call VHTL_debug('closed template somewhere ' . l:adjustForClosingBracket)
-    return indent(v:lnum-1) - &shiftwidth + l:adjustForClosingBracket
+    return indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
   endif
 
   let l:wasXml = (IsSynstackXml(l:prevLineSynstack))
