@@ -19,5 +19,6 @@ Plug 'jonsmithers/experimental-lit-html-vim'
 Plug 'pangloss/vim-javascript'
 ```
 
-Note that this plugin conflicts a bit with vim-jsx. If you have it installed,
-you may experience undesirable indentation behavior.
+Note that the auto-indent functionality his quite a few flaws and probably
+needs to be rewritten. Also, this plugin conflicts a bit with vim-jsx. If you
+have it installed, you may experience more undesirable indentation behavior.

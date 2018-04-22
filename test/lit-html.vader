@@ -117,3 +117,71 @@ Expect javascript:
   			html`<span>Loading...</span>`)}
   	</p>
   `;
+
+
+Given javascript (nuances with closing brackets and templates):
+  html`
+  	${when(state==='loading')
+  	${repeat(items, (i) => i.id, (i, index) => html`
+  		<li>${index}: ${i.name}</li>`)}
+  	<div> DEDENT THIS LINE ONCE </div>
+  	<div>
+  		<div>as usual</div>
+  		${this.ternary ? html`
+  			<div>indented</div>
+  		` : html`
+  			<div>also indented</div>
+  		`}
+  		<div> DO NOT DEDENT THIS LINE </div>
+  	</div>
+  `
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+  	${repeat(items, (i) => i.id, (i, index) => html`
+  		<li>${index}: ${i.name}</li>`)}
+  	<div> DEDENT THIS LINE </div>
+  	<div>
+  		<div>as usual</div>
+  		${this.ternary ? html`
+  			<div>indented</div>
+  		` : html`
+  			<div>also indented</div>
+  		`}
+  		<div> DO NOT DEDENT THIS LINE </div>
+  	</div>
+  `
+
+
+" " This test fails because vim-javascript doesn't correctly indent ternaries inside ${ }
+" Given javascript (subsequent templates):
+"   html`
+"     ${user.isloggedIn
+"         ? html`Welcome ${user.name}`
+"         : html`Please log in`
+"     }
+"   `;
+"       html`
+"         <ul>
+"           ${items.map((i) => html`<li>${i}</li>`)}
+"         </ul>
+"       `;
+"
+" Do:
+"   =G
+"
+" Expect javascript:
+"   html`
+"   	${user.isloggedIn
+"   			? html`Welcome ${user.name}`
+"   			: html`Please log in`
+"   	}
+"   `;
+"   html`
+"   	<ul>
+"   		${items.map((i) => html`<li>${i}</li>`)}
+"   	</ul>
+"   `;
