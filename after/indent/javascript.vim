@@ -176,14 +176,19 @@ fu! ComputeLitHtmlIndent()
 
   let l:wasCss = (IsSyntaxCss(l:prevLineSynstack))
 
-  " When it comes to closing } brackets inside templates, I can't find an
-  " algorithm that fits 100%. The logic below if alwed.
-  " TODO maybe this adjustmust is unnecessary when the opening bracket is on
-  " a line where VHTL_opensTemplate() is also true
+  " We add an extra dedent for closing } brackets, as long as the matching {
+  " opener is not on the same line as an opening html`.
+  "
+  " This algorithm does not always work and must be rewritten (hopefully to
+  " something simpler)
   let l:adjustForClosingBracket = 0
   if (!l:wasCss && VHTL_getBracketDepthChange(getline(v:lnum - 1)) < 0)
-    call VHTL_debug('adjusting for close bracket')
-    let l:adjustForClosingBracket = - &shiftwidth
+    :normal! 0[{
+    let l:openingBracketLine = getline(line('.'))
+    if (!VHTL_opensTemplate(l:openingBracketLine))
+      call VHTL_debug('adjusting for close bracket')
+      let l:adjustForClosingBracket = - &shiftwidth
+    endif
   endif
 
   " If a line starts with template close, it is dedented. If a line otherwise

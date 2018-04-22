@@ -121,7 +121,6 @@ Expect javascript:
 
 Given javascript (nuances with closing brackets and templates):
   html`
-  	${when(state==='loading')
   	${repeat(items, (i) => i.id, (i, index) => html`
   		<li>${index}: ${i.name}</li>`)}
   	<div> DEDENT THIS LINE ONCE </div>
@@ -143,7 +142,7 @@ Expect javascript:
   html`
   	${repeat(items, (i) => i.id, (i, index) => html`
   		<li>${index}: ${i.name}</li>`)}
-  	<div> DEDENT THIS LINE </div>
+  	<div> DEDENT THIS LINE ONCE </div>
   	<div>
   		<div>as usual</div>
   		${this.ternary ? html`
