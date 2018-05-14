@@ -22,7 +22,7 @@ syntax region litHtmlRegion
 syn cluster jsExpression add=litHtmlRegion
 
 " allow js interpolation (${...}) inside xml strings 
-syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=xmlString,xmlTag
+syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=xmlString,xmlTag,xmlCommentPart
 
 " Add css highlighting inside <style> tags
 
