@@ -39,7 +39,8 @@ let s:endtag = '^\s*\/\?>\s*;\='
 
 " Get syntax stack at StartOfLine
 fu! SynSOL(lnum)
-  return map(synstack(a:lnum, 1), "synIDattr(v:val, 'name')")
+  let l:col = match(getline(line('.')), '\S') + 1
+  return map(synstack(a:lnum, l:col), "synIDattr(v:val, 'name')")
 endfu
 
 " Get syntax stack at EndOfLine
@@ -170,7 +171,7 @@ fu! ComputeLitHtmlIndent()
     let l:prev_lnum -= 1
   endwhile
 
-  let l:currLineSynstack = SynEOL(v:lnum)
+  let l:currLineSynstack = SynSOL(v:lnum)
   let l:prevLineSynstack = SynEOL(l:prev_lnum)
 
   if (!VHTL_isSynstackInsideLitHtml(l:currLineSynstack) && !VHTL_isSynstackInsideLitHtml(l:prevLineSynstack))
@@ -190,10 +191,8 @@ fu! ComputeLitHtmlIndent()
   if (!l:wasCss && VHTL_getBracketDepthChange(getline(l:prev_lnum)) < 0)
     :exec 'normal! ' . l:prev_lnum . 'G0[{'
     let l:lineWithOpenBracket = getline(line('.'))
-    echom l:lineWithOpenBracket
     if (!VHTL_opensTemplate(l:lineWithOpenBracket))
       call VHTL_debug('adjusting for close bracket')
-      echom "hi/"
       let l:adjustForClosingBracket = - &shiftwidth
     endif
   endif

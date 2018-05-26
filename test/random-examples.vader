@@ -1,3 +1,21 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (multiple syntaxes on one line);
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
+Do:
+  =G
+
+Expect javascript;
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
 Given javascript (tricky indnetation);
 return html`
   <div> Files </div>

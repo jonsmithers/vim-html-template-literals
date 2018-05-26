@@ -1,138 +1,155 @@
-Given javascript (nested xml tags):
-  html`
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (xml in xml);
+html`
+<div>
+<div> </div>
+</div>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+html`
   <div>
-  <div> </div>
+    <div> </div>
+  </div>
+`;
+
+
+
+Given javascript (text line inside xml);
+html`
+  <div>
+  simple text
   </div>
   `;
 
 Do:
   =G
 
-Expect javascript:
-  html`
-  	<div>
-  		<div> </div>
-  	</div>
-  `;
-
-
-
-Given javascript (simple text on a separate line):
-  html`
-    <div>
+Expect javascript;
+html`
+  <div>
     simple text
-    </div>
-    `;
+  </div>
+`;
+
+Given javascript (nested css);
+ html`
+ <style include="module">
+ element {
+   background: green;
+ }
+ .class {
+   border: red;
+ }
+ #id {
+ opacity: 0.5
+ }
+ </style>
+ <div>
+ <paper-button></paper-button>
+ </div>
+ `
 
 Do:
   =G
 
-Expect javascript:
-  html`
-  	<div>
-  		simple text
-  	</div>
-  `;
-
-Given javascript (nested css):
-  html`
-  <div></div>
-  <style inlcude="module">
-  element {
-    background: green;
-  }
-  .class {
-    border: red;
-  }
-  #id {
-  opacity: 0.5
-  }
+Expect javascript;
+html`
+  <style include="module">
+    element {
+      background: green;
+    }
+    .class {
+      border: red;
+    }
+    #id {
+      opacity: 0.5
+    }
   </style>
   <div>
-  <paper-button></paper-button>
+    <paper-button></paper-button>
   </div>
-  `
+`
+
+Given javascript (lit-html readme example 1);
+const render = () => html`
+${when(state === 'loading',
+html`<div>Loading...</div>`,
+html`<p>${message}</p>`)}
+`;
 
 Do:
   =G
 
-Expect javascript:
-  html`
-  	<div></div>
-  	<style inlcude="module">
-  		element {
-  			background: green;
-  		}
-  		.class {
-  			border: red;
-  		}
-  		#id {
-  			opacity: 0.5
-  		}
-  	</style>
-  	<div>
-  		<paper-button></paper-button>
-  	</div>
-  `
-
-Given javascript (lit-html readme examples):
-  const render = () => html`
+Expect javascript;
+const render = () => html`
   ${when(state === 'loading',
-  html`<div>Loading...</div>`,
-  html`<p>${message}</p>`)}
-  `;
-  const render = () => html`
-  <ul>
-  ${repeat(items, (i) => i.id, (i, index) => html`
-  <li>${index}: ${i.name}</li>`)}
-  </ul>
-  `;
-  const render = () => html`
-  <p>
-  ${until(
-  fetch('content.txt').then((r) => r.text()),
-  html`<span>Loading...</span>`)}
-  </p>
-  `;
+    html`<div>Loading...</div>`,
+    html`<p>${message}</p>`)}
+`;
+
+Given javascript (lit-html readme example 2);
+const render = () => html`
+<ul>
+${repeat(items, (i) => i.id, (i, index) => html`
+<li>${index}: ${i.name}</li>`)}
+</ul>
+`;
 
 Do:
   =G
 
-Expect javascript:
-  const render = () => html`
-  	${when(state === 'loading',
-  		html`<div>Loading...</div>`,
-  		html`<p>${message}</p>`)}
-  `;
-  const render = () => html`
-  	<ul>
-  		${repeat(items, (i) => i.id, (i, index) => html`
-  			<li>${index}: ${i.name}</li>`)}
-  	</ul>
-  `;
-  const render = () => html`
-  	<p>
-  		${until(
-  			fetch('content.txt').then((r) => r.text()),
-  			html`<span>Loading...</span>`)}
-  	</p>
-  `;
+Expect javascript;
+const render = () => html`
+  <ul>
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+  </ul>
+`;
+
+Given javascript (lit-html readme example 3);
+const render = () => html`
+<p>
+${until(
+fetch('content.txt').then((r) => r.text()),
+html`<span>Loading...</span>`)}
+</p>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+const render = () => html`
+  <p>
+    ${until(
+      fetch('content.txt').then((r) => r.text()),
+      html`<span>Loading...</span>`)}
+  </p>
+`;
 
 
 Given javascript (nuances with closing brackets and templates):
   html`
-  	${repeat(items, (i) => i.id, (i, index) => html`
-  		<li>${index}: ${i.name}</li>`)}
-  	<div> DEDENT THIS LINE ONCE </div>
-  	<div>
-  		<div>as usual</div>
-  		${this.ternary ? html`
-  			<div>indented</div>
-  		` : html`
-  			<div>also indented</div>
-  		`}
-  		<div> DO NOT DEDENT THIS LINE </div>
-  	</div>
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+    <div> DEDENT THIS LINE ONCE </div>
+    <div>
+      <div>as usual</div>
+      ${this.ternary ? html`
+        <div>indented</div>
+      ` : html`
+        <div>also indented</div>
+      `}
+      <div> DO NOT DEDENT THIS LINE </div>
+    </div>
   `
 
 Do:
@@ -140,18 +157,18 @@ Do:
 
 Expect javascript:
   html`
-  	${repeat(items, (i) => i.id, (i, index) => html`
-  		<li>${index}: ${i.name}</li>`)}
-  	<div> DEDENT THIS LINE ONCE </div>
-  	<div>
-  		<div>as usual</div>
-  		${this.ternary ? html`
-  			<div>indented</div>
-  		` : html`
-  			<div>also indented</div>
-  		`}
-  		<div> DO NOT DEDENT THIS LINE </div>
-  	</div>
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+    <div> DEDENT THIS LINE ONCE </div>
+    <div>
+      <div>as usual</div>
+      ${this.ternary ? html`
+        <div>indented</div>
+      ` : html`
+        <div>also indented</div>
+      `}
+      <div> DO NOT DEDENT THIS LINE </div>
+    </div>
   `
 
 
@@ -174,13 +191,13 @@ Expect javascript:
 "
 " Expect javascript:
 "   html`
-"   	${user.isloggedIn
-"   			? html`Welcome ${user.name}`
-"   			: html`Please log in`
-"   	}
+"     ${user.isloggedIn
+"         ? html`Welcome ${user.name}`
+"         : html`Please log in`
+"     }
 "   `;
 "   html`
-"   	<ul>
-"   		${items.map((i) => html`<li>${i}</li>`)}
-"   	</ul>
+"     <ul>
+"       ${items.map((i) => html`<li>${i}</li>`)}
+"     </ul>
 "   `;
