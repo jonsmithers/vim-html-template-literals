@@ -39,6 +39,31 @@ html`
   </div>
 `;
 
+Given javascript (sparse text lines inside xml):
+  html`
+  <div id="setup">
+  
+  text one
+  
+  text two
+  
+  </div>
+  `
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+    <div id="setup">
+  
+      text one
+  
+      text two
+
+    </div>
+  `
+
 Given javascript (nested css);
  html`
  <style include="module">
