@@ -134,6 +134,11 @@ fu! VHTL_closesTemplate(line)
   endwhile
 endfu
 
+fu! VHTL_closesTag(line)
+  return (-1 != match(a:line, '^\s\+<\/'))
+  " todo: what about <div></div></div> ?
+endfu
+
 fu! VHTL_getHtmlTemplateDepthChange(line)
   let l:templateOpeners = VHTL_countMatches(a:line, 'html`')
   let l:escapedTics     = VHTL_countMatches(a:line, '\M\\`')
@@ -208,8 +213,13 @@ fu! ComputeLitHtmlIndent()
     call VHTL_debug('opened template')
     return indent(l:prev_lnum) + &shiftwidth
   elseif (VHTL_closesTemplate(getline(l:prev_lnum)) && !VHTL_startsWithTemplateEnd(l:prev_lnum))
-    call VHTL_debug('closed template somewhere ' . l:adjustForClosingBracket)
-    return indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
+    call VHTL_debug('closed template ' . l:adjustForClosingBracket)
+    let l:result = indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
+    if (VHTL_closesTag(getline(v:lnum)))
+      call VHTL_debug('closed template and tag ' . l:adjustForClosingBracket)
+      let l:result -= &shiftwidth
+    endif
+    return l:result
   endif
 
   let l:wasXml = (IsSynstackXml(l:prevLineSynstack))
