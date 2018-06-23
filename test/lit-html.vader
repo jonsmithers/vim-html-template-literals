@@ -20,7 +20,24 @@ html`
   </div>
 `;
 
+Given javascript (close template and tag);
+ html`
+ <div>
+ ${when(condition, html`
+ <span></span>`)}
+ </div>`;
+ js();
 
+Do:
+  =G
+
+Expect javascript;
+html`
+  <div>
+    ${when(condition, html`
+      <span></span>`)}
+  </div>`;
+js();
 
 Given javascript (text line inside xml);
 html`
