@@ -10,7 +10,7 @@ if exists('b:did_indent')
   let s:did_indent=b:did_indent
   unlet b:did_indent
 endif
-exe 'runtime! indent/xml.vim'
+exe 'runtime! indent/html.vim'
 if exists('s:did_indent')
   let b:did_indent=s:did_indent
 endif
@@ -45,18 +45,21 @@ endfu
 
 " Get syntax stack at EndOfLine
 fu! SynEOL(lnum)
+  if (a:lnum < 1)
+    return []
+  endif
   let l:lnum = prevnonblank(a:lnum)
   let l:col = strlen(getline(l:lnum))
   return map(synstack(l:lnum, l:col), "synIDattr(v:val, 'name')")
 endfu
 
 fu! IsSyntaxCss(synstack)
-  return get(a:synstack, -1) =~# '^css' || get(a:synstack, -1) =~# '^litHtmlStyleTag$'
+  return get(a:synstack, -1) =~# '^css'
 endfu
 
 " Does synstack end with an xml syntax attribute
-fu! IsSynstackXml(synstack)
-  return get(a:synstack, -1) =~# '^xml'
+fu! IsSynstackHtml(synstack)
+  return get(a:synstack, -1) =~# '^html' || get(a:synstack, -1) =~# '^css'
 endfu
 
 fu! VHTL_isSynstackInsideLitHtml(synstack)
@@ -160,13 +163,16 @@ fu! VHTL_countMatches(string, pattern)
   endwhile
 endfu
 
+if exists('g:VHTL_debugging')
+  set debug=msg " show errors in indentexpr
+endif
 fu! VHTL_debug(str)
   if exists('g:VHTL_debugging')
     echom a:str
   endif
 endfu
 
-" Dispatch to indent method for js/html/css (use custom rules for transitions
+" Dispatch to indent method for js/html (use custom rules for transitions
 " between syntaxes)
 fu! ComputeLitHtmlIndent()
 
@@ -222,18 +228,12 @@ fu! ComputeLitHtmlIndent()
     return l:result
   endif
 
-  let l:wasXml = (IsSynstackXml(l:prevLineSynstack))
-  let l:isXml  = (IsSynstackXml(l:currLineSynstack))
+  let l:wasHtml = (IsSynstackHtml(l:prevLineSynstack))
+  let l:isHtml  = (IsSynstackHtml(l:currLineSynstack))
   let l:isJsx  = (IsSynstackInsideJsx(l:currLineSynstack))
-  if (l:wasXml || l:isXml) && !l:isJsx
+  if (l:wasHtml || l:isHtml) && !l:isJsx
     call VHTL_debug('xml indent ' . l:adjustForClosingBracket)
-    return XmlIndentGet(v:lnum, 0) + l:adjustForClosingBracket
-  endif
-
-  let l:isCss = (IsSyntaxCss(l:currLineSynstack))
-  if l:isCss
-    call VHTL_debug('css indent')
-    return GetCSSIndent()
+    return HtmlIndent() + l:adjustForClosingBracket
   endif
 
   if len(b:litHtmlOriginalIndentExpression)
