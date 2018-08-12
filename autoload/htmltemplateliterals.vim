@@ -9,7 +9,7 @@ function! htmltemplateliterals#amendSyntax()
   endif
 
   syntax region litHtmlRegion
-        \ contains=@HTMLSyntax,jsTemplateExpression,litHtmlStyleTag
+        \ contains=@HTMLSyntax,jsTemplateExpression
         \ start=+html`+
         \ skip=+\\`+
         \ end=+`+
@@ -18,26 +18,7 @@ function! htmltemplateliterals#amendSyntax()
   " \ skip=+\(\\\|html\)`+
   syn cluster jsExpression add=litHtmlRegion
 
-  " allow js interpolation (${...}) inside xml strings 
-  syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=xmlString,xmlTag,xmlCommentPart
-
-  " Add css highlighting inside <style> tags
-
-  if exists('b:current_syntax')
-    let s:current_syntax=b:current_syntax
-    unlet b:current_syntax
-  endif
-  syn include @CSSSyntax syntax/css.vim
-  if exists('s:current_syntax')
-    let b:current_syntax=s:current_syntax
-  endif
-
-  syntax region litHtmlStyleTag contained
-        \ contains=@CSSSyntax,xmlTag,xmlEndTag
-        \ start=+\s<style+
-        \ end=+</style>+
-        \ keepend
-  " The space in front of "<style>" is a hack to get priority over xmlTagName
-  " (see :help syn-priority)
+  " allow js interpolation (${...}) inside html strings 
+  syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=htmlValue,htmlString,htmlComment
 
 endfunction
