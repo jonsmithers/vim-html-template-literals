@@ -19,6 +19,9 @@ function! htmltemplateliterals#amendSyntax()
   syn cluster jsExpression add=litHtmlRegion
 
   " allow js interpolation (${...}) inside html strings 
-  syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=htmlValue,htmlString,htmlComment
+  syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression keepend containedin=htmlString,htmlComment
+
+  syntax region jsTemplateExpressionAsHtmlValue start=+=[\t ]*${+ end=++ contains=jsTemplateExpression containedin=htmlTag
+  " without this, htmlValue will match these expressions and overextend
 
 endfunction
