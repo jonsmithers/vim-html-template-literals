@@ -39,8 +39,11 @@ let s:endtag = '^\s*\/\?>\s*;\='
 
 " Get syntax stack at StartOfLine
 fu! SynSOL(lnum)
-  let l:col = match(getline(line('.')), '\S') + 1
-  return map(synstack(a:lnum, l:col), "synIDattr(v:val, 'name')")
+  let l:col = match(getline(line('.')), '\S')
+  if (l:col == -1)
+    return []
+  endif
+  return map(synstack(a:lnum, l:col+1), "synIDattr(v:val, 'name')")
 endfu
 
 " Get syntax stack at EndOfLine
