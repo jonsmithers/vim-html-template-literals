@@ -5,3 +5,4 @@ call plug#begin('~/.vim/plugged')
     Plug 'pangloss/vim-javascript'
 call plug#end()
 syntax enable
+let g:html_indent_style1 = "inc"

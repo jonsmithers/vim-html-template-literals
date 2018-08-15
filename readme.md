@@ -3,9 +3,9 @@ Syntax highlighting and indentation for
 [**vim-jsx**](https://github.com/mxw/vim-jsx).
 
 ## Supported Syntaxes inside ``html`...` ``
-- Xml tags
+- HTML (including CSS embedded in `<style>` tags)
 - JavaScript string interpolation (`${...}`)
-- Embedded CSS
+- nested templates (``` html`${html`${}`}` ```)
 
 ## Installation
 
@@ -18,6 +18,10 @@ installation looks like this:
 Plug 'jonsmithers/experimental-lit-html-vim'
 Plug 'pangloss/vim-javascript'
 ```
+
+Note: it's generally a good idea to have `let g:html_indent_style1 = "inc"` in
+your vimrc for reasonable indentation of `<style>` tags. See `:help
+html-indenting`.
 
 ## Known Issues
 
