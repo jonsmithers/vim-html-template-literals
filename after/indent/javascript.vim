@@ -38,7 +38,7 @@ setlocal indentkeys+=`
 let s:endtag = '^\s*\/\?>\s*;\='
 
 " Get syntax stack at StartOfLine
-fu! SynSOL(lnum)
+fu! s:SynSOL(lnum)
   let l:col = match(getline(line('.')), '\S')
   if (l:col == -1)
     return []
@@ -47,13 +47,12 @@ fu! SynSOL(lnum)
 endfu
 
 " Get syntax stack at EndOfLine
-fu! SynEOL(lnum)
+fu! s:SynEOL(lnum)
   if (a:lnum < 1)
     return []
   endif
-  let l:lnum = prevnonblank(a:lnum)
-  let l:col = strlen(getline(l:lnum))
-  return map(synstack(l:lnum, l:col), "synIDattr(v:val, 'name')")
+  let l:col = strlen(getline(a:lnum))
+  return map(synstack(a:lnum, l:col), "synIDattr(v:val, 'name')")
 endfu
 
 fu! IsSyntaxCss(synstack)
@@ -180,13 +179,10 @@ endfu
 fu! ComputeLitHtmlIndent()
 
   " get most recent non-empty line
-  let l:prev_lnum = v:lnum - 1
-  while (v:lnum > 1 && -1 != match(getline(l:prev_lnum), '^\s*$'))
-    let l:prev_lnum -= 1
-  endwhile
+  let l:prev_lnum = prevnonblank(v:lnum - 1)
 
-  let l:currLineSynstack = SynSOL(v:lnum)
-  let l:prevLineSynstack = SynEOL(l:prev_lnum)
+  let l:currLineSynstack = s:SynSOL(v:lnum)
+  let l:prevLineSynstack = s:SynEOL(l:prev_lnum)
 
   if (!VHTL_isSynstackInsideLitHtml(l:currLineSynstack) && !VHTL_isSynstackInsideLitHtml(l:prevLineSynstack))
     call VHTL_debug('outside of litHtmlRegion')
