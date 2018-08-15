@@ -140,7 +140,7 @@ fu! VHTL_closesTemplate(line)
 endfu
 
 fu! VHTL_closesTag(line)
-  return (-1 != match(a:line, '^\s\+<\/'))
+  return (-1 != match(a:line, '^\s*<\/'))
   " todo: what about <div></div></div> ?
 endfu
 
