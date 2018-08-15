@@ -172,7 +172,6 @@ fu! VHTL_countMatches(string, pattern)
   endwhile
 endfu
 
-let g:VHTL_debugging = 1
 if exists('g:VHTL_debugging')
   set debug=msg " show errors in indentexpr
 endif
