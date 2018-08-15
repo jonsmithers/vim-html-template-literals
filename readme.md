@@ -26,3 +26,9 @@ Plug 'pangloss/vim-javascript'
   rather tricky. -->
 - This plugin conflicts a bit with vim-jsx. Having both installed
   simultaneously may result in undesired indentation behaviors.
+  
+## Tip
+
+- It's generally a good idea to have `let g:html_indent_style1 = "inc"` in your
+  vimrc for reasonable indentation of `<style>` tags. See `:help
+  html-indenting`.
