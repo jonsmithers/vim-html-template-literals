@@ -181,9 +181,87 @@ fu! VHTL_debug(str)
   endif
 endfu
 
+function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
+  let byte = line2byte(a:l) + a:c - 1
+  let pos = index(s:synid_cache[0], byte)
+  if pos == -1
+    let s:synid_cache[:] += [[byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
+  endif
+  return s:synid_cache[1][pos]
+endfunction
+
+let s:StateClass={}
+fu! s:StateClass.new()
+  let l:instance = copy(self)
+  let l:instance.currLine = v:lnum
+  let l:instance.prevLine = prevnonblank(v:lnum - 1)
+  let l:instance.currSynstack = VHTL_SynSOL(l:instance.currLine)
+  let l:instance.prevSynstack = VHTL_SynEOL(l:instance.prevLine)
+  return l:instance
+endfu
+
+fu! s:StateClass.startsWithTemplateClose() dict
+  return (getline(self.currSynstack)) =~# '^\s*`'
+endfu
+
+fu! s:StateClass.closedJsExpression() dict
+  return VHTL_closesJsExpression(getline(self.prevLine))
+endfu
+fu! s:StateClass.closesJsExpression() dict
+  return VHTL_closesJsExpression(getline(self.currLine))
+endfu
+fu! s:StateClass.opensLitHtmlTemplate() dict
+  return VHTL_opensTemplate(getline(self.currLine))
+endfu
+fu! s:StateClass.openedLitHtmlTemplate() dict
+  return VHTL_opensTemplate(getline(self.prevLine))
+endfu
+fu! s:StateClass.closesLitHtmlTemplate() dict
+  return VHTL_closesTemplate(getline(self.curLine))
+endfu
+fu! s:StateClass.closedLitHtmlTemplate() dict
+  return VHTL_closesTemplate(getline(self.prevLine))
+endfu
+
+fu! s:StateClass.isInsideLitHtml() dict
+  return VHTL_isSynstackInsideLitHtml(self.currSynstack)
+endfu
+fu! s:StateClass.wasInsideLitHtml() dict
+  return VHTL_isSynstackInsideLitHtml(self.prevSynstack)
+endfu
+fu! s:StateClass.isInsideJsx() dict
+  return IsSynstackInsideJsx(self.currSynstack)
+endfu
+
+fu! s:StateClass.wasHtml() dict
+  return get(self.prevSynstack, -1) =~# '^html'
+endfu
+fu! s:StateClass.isHtml() dict
+  return get(self.currSynstack, -1) =~# '^html'
+endfu
+fu! s:StateClass.wasJs() dict
+  return get(self.prevSynstack, -1) =~# '^js'
+endfu
+fu! s:StateClass.isJs() dict
+  return get(self.currSynstack, -1) =~# '^js'
+endfu
+fu! s:StateClass.wasCss() dict
+  return get(self.prevSynstack, -1) =~# '^css'
+endfu
+fu! s:StateClass.isCss() dict
+  return get(self.currSynstack, -1) =~# '^css'
+endfu
+
+fu! s:StateClass.toStr() dict
+  return '{line ' . self.currLine . '}'
+endfu
+
 " Dispatch to indent method for js/html (use custom rules for transitions
 " between syntaxes)
 fu! ComputeLitHtmlIndent()
+  let s:synid_cache = [[],[]]
+
+  let l:state = s:StateClass.new()
 
   " get most recent non-empty line
   let l:prev_lnum = prevnonblank(v:lnum - 1)
@@ -191,41 +269,23 @@ fu! ComputeLitHtmlIndent()
   let l:currLineSynstack = VHTL_SynSOL(v:lnum)
   let l:prevLineSynstack = VHTL_SynEOL(l:prev_lnum)
 
-  if (!VHTL_isSynstackInsideLitHtml(l:currLineSynstack) && !VHTL_isSynstackInsideLitHtml(l:prevLineSynstack))
+  if (!l:state.isInsideLitHtml() && !l:state.wasInsideLitHtml())
     call VHTL_debug('outside of litHtmlRegion')
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 
-
-  let l:wasCss = (IsSynstackCss(l:prevLineSynstack))
+  " THIS ALGORITHM MIGHT ACTUALLY WORK
+  " let l:indent_basis = previous matching js or template start, otherwise equal to previous line
+  " let l:indent_delta = -1 for starting with closing tag, template, or expression
 
   " We add an extra dedent for closing } brackets, as long as the matching {
   " opener is not on the same line as an opening html`.
   "
   " This algorithm does not always work and must be rewritten (hopefully to
   " something simpler)
-  let l:adjustForClosingBracket = 0
-  " if (!l:wasCss && VHTL_closesJsExpression(getline(l:prev_lnum)))
-  "   :exec 'normal! ' . l:prev_lnum . 'G0[{'
-  "   let l:lineWithOpenBracket = getline(line('.'))
-  "   if (!VHTL_opensTemplate(l:lineWithOpenBracket))
-  "     call VHTL_debug('adjusting for close bracket')
-  "     let l:adjustForClosingBracket = - &shiftwidth
-  "   endif
-  " endif
-
-  let l:wasHtml = (IsSynstackHtml(l:prevLineSynstack))
-  let l:isHtml  = (IsSynstackHtml(l:currLineSynstack))
-  let l:wasCss  = (IsSynstackCss(l:prevLineSynstack))
-  let l:isCss   = (IsSynstackCss(l:currLineSynstack))
-  let l:wasJs   = (IsSynstackJs(l:prevLineSynstack))
-  let l:isJs    = (IsSynstackJs(l:currLineSynstack))
-
-  " If a line starts with template close, it is dedented. If a line otherwise
-  " contains a template close, the NEXT line is dedented. Note that template
-  " closers can be balanced out by template openers.
-  if (VHTL_startsWithTemplateEnd(v:lnum))
-    call VHTL_debug('closed template at start ')
+  "
+  if (l:state.closesLitHtmlTemplate())
+    call VHTL_debug('closed template')
     let l:result = indent(l:prev_lnum) - &shiftwidth
     if (VHTL_closesJsExpression(getline(l:prev_lnum)))
       call VHTL_debug('closed template at start and js expression')
@@ -233,10 +293,11 @@ fu! ComputeLitHtmlIndent()
     endif
     return l:result
   endif
-  if (VHTL_opensTemplate(getline(l:prev_lnum)))
+  if (l:state.openedLitHtmlTemplate())
     call VHTL_debug('opened template')
     return indent(l:prev_lnum) + &shiftwidth
   elseif (VHTL_closesTemplate(getline(l:prev_lnum)) && !VHTL_startsWithTemplateEnd(l:prev_lnum))
+  " elseif (l:state.closedLitHtmlTemplate() && !l:state.closesLitHtmlTemplate())
     call VHTL_debug('closed template ' . l:adjustForClosingBracket)
     let l:result = indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
     if (VHTL_closesTag(getline(v:lnum)))
@@ -244,7 +305,7 @@ fu! ComputeLitHtmlIndent()
       let l:result -= &shiftwidth
     endif
     return l:result
-  elseif (l:isHtml && l:wasJs && VHTL_closesJsExpression(getline(l:prev_lnum)))
+  elseif (l:state.isHtml() && l:state.wasJs() && VHTL_closesJsExpression(getline(l:prev_lnum)))
     let l:result = indent(l:prev_lnum) - &shiftwidth
     call VHTL_debug('closes expression')
     if (VHTL_closesTag(getline(v:lnum)))
