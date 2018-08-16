@@ -252,19 +252,10 @@ fu! ComputeLitHtmlIndent()
       call VHTL_debug('closes expression and tag')
     endif
     return l:result
-  endif
-
-  let l:isJsx  = (IsSynstackInsideJsx(l:currLineSynstack))
-  if (l:wasCss || l:isCss || l:wasHtml || l:isHtml) && !l:isJsx
-    call VHTL_debug('html indent ' . l:adjustForClosingBracket)
-    return HtmlIndent() + l:adjustForClosingBracket
-  endif
-
-  if len(b:litHtmlOriginalIndentExpression)
-    call VHTL_debug('js indent ' . b:litHtmlOriginalIndentExpression)
+  elseif (l:isJs && l:wasJs)
     return eval(b:litHtmlOriginalIndentExpression)
-  else
-    call VHTL_debug('cindent should never happen')
-    return cindent(v:lnum)
   endif
+
+  call VHTL_debug('defaulting to html indent')
+  return HtmlIndent()
 endfu
