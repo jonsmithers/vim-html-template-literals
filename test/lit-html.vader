@@ -213,6 +213,48 @@ Expect javascript:
     </div>
   `
 
+Given javascript (adjacent js expressions):
+  html`
+    ${console.log(null)}
+    ${console.log('this line should have equal indentation')}
+  `
+Do:
+  =G
+
+Expect javascript:
+  html`
+    ${console.log(null)}
+    ${console.log('this line should have equal indentation')}
+  `
+
+Given javascript(multiple dedents after closing js expression):
+  html`
+    <div>
+      ${ test 
+        ? html`<p>one</p>`
+        : html`
+          <p>
+            two
+          </p>`}
+    </div>
+    <span> dedent THRICE here </span>
+  `;
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+    <div>
+      ${ test 
+        ? html`<p>one</p>`
+        : html`
+          <p>
+            two
+          </p>`}
+    </div>
+    <span> dedent THRICE here </span>
+  `;
 
 " " This test fails because vim-javascript doesn't correctly indent ternaries inside ${ }
 " Given javascript (subsequent templates):
