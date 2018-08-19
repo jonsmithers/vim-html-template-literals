@@ -172,15 +172,6 @@ fu! VHTL_countMatches(string, pattern)
   endwhile
 endfu
 
-if exists('g:VHTL_debugging')
-  set debug=msg " show errors in indentexpr
-endif
-fu! VHTL_debug(str)
-  if exists('g:VHTL_debugging')
-    echom a:str
-  endif
-endfu
-
 function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
   let byte = line2byte(a:l) + a:c - 1
   let pos = index(s:synid_cache[0], byte)
@@ -189,6 +180,18 @@ function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
   endif
   return s:synid_cache[1][pos]
 endfunction
+
+if exists('g:VHTL_debugging')
+  set debug=msg " show errors in indentexpr
+  fu! SynAt(l,c)
+    return s:SynAt(a:l,a:c)
+  endfu
+endif
+fu! VHTL_debug(str)
+  if exists('g:VHTL_debugging')
+    echom a:str
+  endif
+endfu
 
 let s:StateClass={}
 fu! s:StateClass.new()
@@ -210,6 +213,9 @@ endfu
 fu! s:StateClass.closesJsExpression() dict
   return VHTL_closesJsExpression(getline(self.currLine))
 endfu
+fu! s:StateClass.openedJsExpression() dict
+  return (VHTL_getBracketDepthChange(getline(self.prevLine)) > 0)
+endfu
 fu! s:StateClass.opensLitHtmlTemplate() dict
   return VHTL_opensTemplate(getline(self.currLine))
 endfu
@@ -217,7 +223,7 @@ fu! s:StateClass.openedLitHtmlTemplate() dict
   return VHTL_opensTemplate(getline(self.prevLine))
 endfu
 fu! s:StateClass.closesLitHtmlTemplate() dict
-  return VHTL_closesTemplate(getline(self.curLine))
+  return VHTL_closesTemplate(getline(self.currLine))
 endfu
 fu! s:StateClass.closedLitHtmlTemplate() dict
   return VHTL_closesTemplate(getline(self.prevLine))
@@ -256,6 +262,75 @@ fu! s:StateClass.toStr() dict
   return '{line ' . self.currLine . '}'
 endfu
 
+fu! s:SkipFuncJsTemplateBraces()
+  " let l:char = getline(line('.'))[col('.')-1]
+  let l:syntax = s:SynAt(line('.'), col('.'))
+  if (l:syntax != 'jsTemplateBraces')
+    echom 'SKIP YES because ' . l:syntax
+    return 1
+  endif
+endfu
+
+fu! s:SkipFuncLitHtmlRegion()
+  " let l:char = getline(line('.'))[col('.')-1]
+  let l:syntax = s:SynAt(line('.'), col('.'))
+  if (l:syntax != 'litHtmlRegion')
+    echom 'SKIP YES because ' . l:syntax
+    return 1
+  endif
+endfu
+
+
+" html tag, html template, or js expression on previous line
+fu! s:StateClass.getIndentOfLastClose() dict
+  let l:line = getline(self.prevLine)
+
+  " The following regex converts a line to purely a list of closing words.
+  " Pretty cool but not useful
+  " echo split(getline(62), '.\{-}\ze\(}\|`\|<\/\w\+>\)')
+
+  let l:anyCloserWord =  '}\|`\|<\/\w\+>'
+
+
+  let l:index = 0
+  let l:closeWords = []
+  while v:true
+    let [l:term, l:index, l:trash] = matchstrpos(l:line, l:anyCloserWord, l:index)
+    if (l:index == -1)
+      break
+    else
+      call add(l:closeWords, [l:term, l:index])
+    endif
+    let l:index += 1
+  endwhile
+
+  for l:item in reverse(l:closeWords)
+    let [l:closeWord, l:col] = l:item
+    let l:col += 1
+    let l:syntax = s:SynAt(self.prevLine, l:col)
+    call cursor(self.prevLine, l:col) " sets start point for searchpair()
+    redraw
+    if ("}" == l:closeWord && l:syntax == 'jsTemplateBraces')
+      call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
+      echom 'JS BRACE BASE INDENT '
+    elseif ("`" == l:closeWord && l:syntax == 'litHtmlRegion')
+      call searchpair('html`', '', '\(html\)\@<!`', 'b', 's:SkipFuncLitHtmlRegion()')
+      echom 'LIT HTML REGION BASE INDENT '
+    elseif (l:syntax == 'htmlEndTag')
+      let l:openWord = substitute(substitute(l:closeWord, '/', '', ''), '>', '', '')
+      echom 'open word ' . l:openWord
+      call searchpair(l:openWord, '', l:closeWord, 'b')
+      echom 'HTML TAG REGION BASE INDENT '
+    else
+      echom "UNRECOGNIZED CLOSER SYNTAX: '" . l:syntax . "'"
+      echom getline(line('.'))
+    endif
+    return indent(line('.')) " cursor was moved by searchpair()
+  endfor
+endfu
+
+" com! MyTest exec "call s:StateClass.new().getIndentOfLastClose()"
+
 " Dispatch to indent method for js/html (use custom rules for transitions
 " between syntaxes)
 fu! ComputeLitHtmlIndent()
@@ -274,9 +349,33 @@ fu! ComputeLitHtmlIndent()
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 
+  if (l:state.wasJs() && l:state.isJs())
+    call VHTL_debug('default javascript indentation inside lit-html region')
+    return eval(b:litHtmlOriginalIndentExpression)
+  endif
+
+  if (l:state.openedLitHtmlTemplate())
+    call VHTL_debug('opened tagged template literal')
+    return indent(l:prev_lnum) + &shiftwidth
+  endif
+
+  if (l:state.openedJsExpression())
+    call VHTL_debug('opened js expression')
+    return indent(l:prev_lnum) + &shiftwidth
+  endif
+
+
+
+  " lit, js, html, css
+
   " THIS ALGORITHM MIGHT ACTUALLY WORK
   " let l:indent_basis = previous matching js or template start, otherwise equal to previous line
   " let l:indent_delta = -1 for starting with closing tag, template, or expression
+
+  let l:base_indent = l:state.getIndentOfLastClose()
+  echom 'base indent ' . l:base_indent
+  return l:base_indent
+
 
   " We add an extra dedent for closing } brackets, as long as the matching {
   " opener is not on the same line as an opening html`.
