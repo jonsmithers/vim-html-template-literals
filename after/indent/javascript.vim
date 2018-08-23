@@ -320,11 +320,11 @@ fu! s:StateClass.getIndentDelta() dict
   let [l:closeWord, l:col] = l:closeWords[0]
   let l:syntax = s:SynAt(self.currLine, l:col)
   if (l:syntax == 'htmlEndTag')
-    call VHTL_debug('delta_indent: html end tag')
+    call VHTL_debug('indent_delta: html end tag')
     return - &shiftwidth
   endif
   if (l:syntax == 'litHtmlRegion' && 'html`' != strpart(getline(self.currLine), l:col-5, len('html`')))
-    call VHTL_debug('delta_indent: end of litHtmlRegion')
+    call VHTL_debug('indent_delta: end of litHtmlRegion')
     return - &shiftwidth
   endif
   return 0
@@ -400,17 +400,17 @@ fu! ComputeLitHtmlIndent()
   endif
 
   if (l:state.wasJsTemplateBrace() || l:state.isLitHtmlRegionCloser())
-    " let l:indent_basis = previous matching js or template start, otherwise equal to previous line
+    " let l:indent_basis = previous matching js or template start
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
-    let l:base_indent = l:state.getIndentOfLastClose()
-    if (l:base_indent == -1)
+    let l:indent_basis = l:state.getIndentOfLastClose()
+    if (l:indent_basis == -1)
       call VHTL_debug("default to html indent because base indent not found")
       return HtmlIndent()
     endif
-    let l:delta_indent = l:state.getIndentDelta()
-    call VHTL_debug('indent delta ' . l:delta_indent)
-    call VHTL_debug('indent base ' . l:base_indent)
-    return l:base_indent + l:delta_indent
+    let l:indent_delta = l:state.getIndentDelta()
+    call VHTL_debug('indent delta ' . l:indent_delta)
+    call VHTL_debug('indent basis ' . l:indent_basis)
+    return l:indent_basis + l:indent_delta
   endif
 
   if ((l:state.wasJs() && !l:state.wasJsTemplateBrace()) && (l:state.isJs() && !l:state.isJsTemplateBrace()))
