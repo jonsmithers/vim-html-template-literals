@@ -400,7 +400,8 @@ fu! ComputeLitHtmlIndent()
   endif
 
   if (l:state.wasJsTemplateBrace() || l:state.isLitHtmlRegionCloser())
-    call VHTL_debug('template brace!')
+    " let l:indent_basis = previous matching js or template start, otherwise equal to previous line
+    " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:base_indent = l:state.getIndentOfLastClose()
     if (l:base_indent == -1)
       call VHTL_debug("default to html indent because base indent not found")
@@ -412,65 +413,10 @@ fu! ComputeLitHtmlIndent()
     return l:base_indent + l:delta_indent
   endif
 
-
-
-  " if ((l:state.wasCss() || l:state.wasHtml()) && (l:state.isCss() || l:state.isHtml()))
-  "   return HtmlIndent()
-  " endif
   if ((l:state.wasJs() && !l:state.wasJsTemplateBrace()) && (l:state.isJs() && !l:state.isJsTemplateBrace()))
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 
   call VHTL_debug('default to html indent')
-  return HtmlIndent()
-
-  " lit, js, html, css
-
-  " THIS ALGORITHM MIGHT ACTUALLY WORK
-  " let l:indent_basis = previous matching js or template start, otherwise equal to previous line
-  " let l:indent_delta = -1 for starting with closing tag, template, or expression
-
-
-
-  " We add an extra dedent for closing } brackets, as long as the matching {
-  " opener is not on the same line as an opening html`.
-  "
-  " This algorithm does not always work and must be rewritten (hopefully to
-  " something simpler)
-  "
-  if (l:state.closesLitHtmlTemplate())
-    call VHTL_debug('closed template')
-    let l:result = indent(l:prev_lnum) - &shiftwidth
-    if (VHTL_closesJsExpression(getline(l:prev_lnum)))
-      call VHTL_debug('closed template at start and js expression')
-      let l:result -= &shiftwidth
-    endif
-    return l:result
-  endif
-  if (l:state.openedLitHtmlTemplate())
-    call VHTL_debug('opened template')
-    return indent(l:prev_lnum) + &shiftwidth
-  elseif (VHTL_closesTemplate(getline(l:prev_lnum)) && !VHTL_startsWithTemplateEnd(l:prev_lnum))
-  " elseif (l:state.closedLitHtmlTemplate() && !l:state.closesLitHtmlTemplate())
-    call VHTL_debug('closed template ' . l:adjustForClosingBracket)
-    let l:result = indent(l:prev_lnum) - &shiftwidth + l:adjustForClosingBracket
-    if (VHTL_closesTag(getline(v:lnum)))
-      call VHTL_debug('closed template and tag ' . l:adjustForClosingBracket)
-      let l:result -= &shiftwidth
-    endif
-    return l:result
-  elseif (l:state.isHtml() && l:state.wasJs() && VHTL_closesJsExpression(getline(l:prev_lnum)))
-    let l:result = indent(l:prev_lnum) - &shiftwidth
-    call VHTL_debug('closes expression')
-    if (VHTL_closesTag(getline(v:lnum)))
-      let l:result -= &shiftwidth
-      call VHTL_debug('closes expression and tag')
-    endif
-    return l:result
-  elseif (l:isJs && l:wasJs)
-    return eval(b:litHtmlOriginalIndentExpression)
-  endif
-
-  call VHTL_debug('defaulting to html indent')
   return HtmlIndent()
 endfu
