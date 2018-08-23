@@ -3,7 +3,7 @@ Before:
   set shiftwidth=2
   set expandtab
 
-Given javascript (xml in xml);
+Given javascript (html in html);
 html`
 <div>
 <div> </div>
