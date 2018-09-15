@@ -336,6 +336,7 @@ fu! s:StateClass.getIndentOfLastClose() dict
   let l:closeWords = s:getCloseWordsLeftToRight(self.prevLine)
 
   if (len(l:closeWords) == 0)
+    call VHTL_debug('no close words found')
     return -1
   endif
 
@@ -404,8 +405,8 @@ fu! ComputeLitHtmlIndent()
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:indent_basis = l:state.getIndentOfLastClose()
     if (l:indent_basis == -1)
-      call VHTL_debug("default to html indent because base indent not found")
-      return HtmlIndent()
+      call VHTL_debug("using html indent as base indent")
+      let l:indent_basis = HtmlIndent()
     endif
     let l:indent_delta = l:state.getIndentDelta()
     call VHTL_debug('indent delta ' . l:indent_delta)
