@@ -183,13 +183,11 @@ endfunction
 
 if exists('g:VHTL_debugging')
   set debug=msg " show errors in indentexpr
-  fu! SynAt(l,c)
-    return s:SynAt(a:l,a:c)
-  endfu
 endif
-fu! VHTL_debug(str)
+" Make debug log. You can view these logs using ':messages'
+fu! s:debug(str)
   if exists('g:VHTL_debugging')
-    echom a:str
+    echom 'vhtl ' . v:lnum . ': ' . a:str
   endif
 endfu
 
@@ -246,6 +244,7 @@ fu! s:StateClass.isHtml() dict
   return get(self.currSynstack, -1) =~# '^html'
 endfu
 fu! s:StateClass.isLitHtmlRegionCloser() dict
+  " TODO this doesn't accoutn for semicolons or trailing spaces?
   return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*`'
 endfu
 fu! s:StateClass.wasJs() dict
@@ -320,11 +319,11 @@ fu! s:StateClass.getIndentDelta() dict
   let [l:closeWord, l:col] = l:closeWords[0]
   let l:syntax = s:SynAt(self.currLine, l:col)
   if (l:syntax == 'htmlEndTag')
-    call VHTL_debug('indent_delta: html end tag')
+    call s:debug('indent_delta: html end tag')
     return - &shiftwidth
   endif
   if (l:syntax == 'litHtmlRegion' && 'html`' != strpart(getline(self.currLine), l:col-5, len('html`')))
-    call VHTL_debug('indent_delta: end of litHtmlRegion')
+    call s:debug('indent_delta: end of litHtmlRegion')
     return - &shiftwidth
   endif
   return 0
@@ -336,7 +335,7 @@ fu! s:StateClass.getIndentOfLastClose() dict
   let l:closeWords = s:getCloseWordsLeftToRight(self.prevLine)
 
   if (len(l:closeWords) == 0)
-    call VHTL_debug('no close words found')
+    call s:debug('no close words found')
     return -1
   endif
 
@@ -347,16 +346,16 @@ fu! s:StateClass.getIndentOfLastClose() dict
     redraw
     if ("}" == l:closeWord && l:syntax == 'jsTemplateBraces')
       call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
-      call VHTL_debug('js brace base indent')
+      call s:debug('js brace base indent')
     elseif ("`" == l:closeWord && l:syntax == 'litHtmlRegion')
       call searchpair('html`', '', '\(html\)\@<!`', 'b', 's:SkipFuncLitHtmlRegion()')
-      call VHTL_debug('lit html region base indent ')
+      call s:debug('lit html region base indent ')
     elseif (l:syntax == 'htmlEndTag')
       let l:openWord = substitute(substitute(l:closeWord, '/', '', ''), '>', '', '')
       call searchpair(l:openWord, '', l:closeWord, 'b')
-      call VHTL_debug('html tag region base indent ')
+      call s:debug('html tag region base indent ')
     else
-      call VHTL_debug("UNRECOGNIZED CLOSER SYNTAX: '" . l:syntax . "'")
+      call s:debug("UNRECOGNIZED CLOSER SYNTAX: '" . l:syntax . "'")
     endif
     return indent(line('.')) " cursor was moved by searchpair()
   endfor
@@ -374,11 +373,8 @@ fu! ComputeLitHtmlIndent()
   " get most recent non-empty line
   let l:prev_lnum = prevnonblank(v:lnum - 1)
 
-  let l:currLineSynstack = VHTL_SynSOL(v:lnum)
-  let l:prevLineSynstack = VHTL_SynEOL(l:prev_lnum)
-
   if (!l:state.isInsideLitHtml() && !l:state.wasInsideLitHtml())
-    call VHTL_debug('outside of litHtmlRegion: ' . b:litHtmlOriginalIndentExpression)
+    call s:debug('outside of litHtmlRegion: ' . b:litHtmlOriginalIndentExpression)
 
     if (exists('b:hi_indent') && has_key(b:hi_indent, 'blocklnr'))
       call remove(b:hi_indent, 'blocklnr')
@@ -391,12 +387,12 @@ fu! ComputeLitHtmlIndent()
   endif
 
   if (l:state.openedLitHtmlTemplate())
-    call VHTL_debug('opened tagged template literal')
+    call s:debug('opened tagged template literal')
     return indent(l:prev_lnum) + &shiftwidth
   endif
 
   if (l:state.openedJsExpression())
-    call VHTL_debug('opened js expression')
+    call s:debug('opened js expression')
     return indent(l:prev_lnum) + &shiftwidth
   endif
 
@@ -405,12 +401,12 @@ fu! ComputeLitHtmlIndent()
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:indent_basis = l:state.getIndentOfLastClose()
     if (l:indent_basis == -1)
-      call VHTL_debug("using html indent as base indent")
+      call s:debug("using html indent as base indent")
       let l:indent_basis = HtmlIndent()
     endif
     let l:indent_delta = l:state.getIndentDelta()
-    call VHTL_debug('indent delta ' . l:indent_delta)
-    call VHTL_debug('indent basis ' . l:indent_basis)
+    call s:debug('indent delta ' . l:indent_delta)
+    call s:debug('indent basis ' . l:indent_basis)
     return l:indent_basis + l:indent_delta
   endif
 
@@ -418,6 +414,6 @@ fu! ComputeLitHtmlIndent()
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 
-  call VHTL_debug('default to html indent')
+  call s:debug('default to html indent')
   return HtmlIndent()
 endfu
