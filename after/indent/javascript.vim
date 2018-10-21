@@ -39,7 +39,7 @@ let s:endtag = '^\s*\/\?>\s*;\='
 
 " Get syntax stack at StartOfLine
 fu! VHTL_SynSOL(lnum)
-  let l:col = match(getline(line('.')), '\S')
+  let l:col = match(getline(a:lnum), '\S')
   if (l:col == -1)
     return []
   endif
