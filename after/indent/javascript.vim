@@ -192,10 +192,10 @@ fu! s:debug(str)
 endfu
 
 let s:StateClass={}
-fu! s:StateClass.new()
+fu! s:StateClass.new(lnum)
   let l:instance = copy(self)
-  let l:instance.currLine = v:lnum
-  let l:instance.prevLine = prevnonblank(v:lnum - 1)
+  let l:instance.currLine = a:lnum
+  let l:instance.prevLine = prevnonblank(a:lnum - 1)
   let l:instance.currSynstack = VHTL_SynSOL(l:instance.currLine)
   let l:instance.prevSynstack = VHTL_SynEOL(l:instance.prevLine)
   return l:instance
@@ -368,7 +368,7 @@ endfu
 fu! ComputeLitHtmlIndent()
   let s:synid_cache = [[],[]]
 
-  let l:state = s:StateClass.new()
+  let l:state = s:StateClass.new(v:lnum)
 
   " get most recent non-empty line
   let l:prev_lnum = prevnonblank(v:lnum - 1)
