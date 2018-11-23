@@ -2,4 +2,9 @@
 
 cd "$(dirname "$0")"
 
-vim -u <(cat minimalvimrc) +Vader*
+if [[ "$CI" = true ]]; then
+  export VADER_OUTPUT_FILE='testresults.txt'
+  vim -u <(cat minimalvimrc) +'Vader! indent/*.vader'
+else
+  vim -u <(cat minimalvimrc) +'Vader  indent/*.vader'
+fi

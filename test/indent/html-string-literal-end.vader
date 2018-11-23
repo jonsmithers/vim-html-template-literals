@@ -1,0 +1,56 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+" IT SHOULD MATCH REGION END INDENT WITH REGION START
+
+Given javascript (LITERAL WITH SINGLE NEWLINE);
+{
+html`
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+  `;
+}
+
+Given javascript (LITERAL WITH SINGLE HTML TAG);
+{
+html`
+<div></div>
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div></div>
+  `;
+}
+
+
+Given javascript (LITERAL WITH SINGLE SELF CLOSING TAG);
+{
+html`
+<img />
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <img />
+  `;
+}

@@ -86,21 +86,6 @@ fu! IsSynstackInsideJsx(synstack)
   return v:false
 endfu
 
-fu! VHTL_closesJsExpression(str)
-  return (VHTL_getBracketDepthChange(a:str) < 0)
-endfu
-fu! VHTL_getBracketDepthChange(str)
-  let l:depth=0
-  for l:char in split(a:str, '\zs')
-    if (l:char ==# '{')
-      let l:depth += 1
-    elseif (l:char ==# '}')
-      let l:depth -=1
-    endif
-  endfor
-  return l:depth
-endfu
-
 fu! VHTL_startsWithTemplateEnd(linenum)
   return (getline(a:linenum)) =~# '^\s*`'
 endfu
@@ -205,12 +190,6 @@ fu! s:StateClass.startsWithTemplateClose() dict
   return (getline(self.currSynstack)) =~# '^\s*`'
 endfu
 
-fu! s:StateClass.closedJsExpression() dict
-  return VHTL_closesJsExpression(getline(self.prevLine))
-endfu
-fu! s:StateClass.closesJsExpression() dict
-  return VHTL_closesJsExpression(getline(self.currLine))
-endfu
 fu! s:StateClass.openedJsExpression() dict
   return (VHTL_getBracketDepthChange(getline(self.prevLine)) > 0)
 endfu
@@ -247,17 +226,33 @@ fu! s:StateClass.isLitHtmlRegionCloser() dict
   " TODO this doesn't accoutn for semicolons or trailing spaces?
   return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*`'
 endfu
+fu! s:StateClass.opensTemplate() dict
+  return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*html`'
+endfu
 fu! s:StateClass.wasJs() dict
-  return get(self.prevSynstack, -1) =~# '^js'
-endfu
-fu! s:StateClass.isJsTemplateBrace() dict
-  return get(self.currSynstack, -1) ==# 'jsTemplateBraces'
-endfu
-fu! s:StateClass.wasJsTemplateBrace() dict
-  return get(self.prevSynstack, -1) ==# 'jsTemplateBraces'
+  call s:debug(string(get(self.prevSynstack, -1)))
+  return get(self.prevSynstack, -1) =~# '^js' || get(self.prevSynstack, -1) =~# '^javaScript'
 endfu
 fu! s:StateClass.isJs() dict
-  return get(self.currSynstack, -1) =~# '^js'
+  return get(self.currSynstack, -1) =~# '^js' || get(self.currSynstack, -1) =~# '^javaScript'
+endfu
+fu! s:StateClass.wasExpressionBracket() dict
+  return get(self.prevSynstack, -1) ==# 'jsTemplateBraces'
+endfu
+fu! s:StateClass.isExpressionBracket() dict
+  return get(l:self.currSynstack, -1) ==# 'jsTemplateBraces'
+endfu
+fu! s:StateClass.closedExpression() dict
+  return l:self.wasExpressionBracket() && self.prevLine[-1:-1] ==# '}'
+endfu
+fu! s:StateClass.closesExpression() dict
+  return l:self.isExpressionBracket() && self.currLine[-1:-1] ==# '}'
+endfu
+fu! s:StateClass.openedExpression() dict
+  return l:self.wasExpressionBracket() && self.prevLine[-1:-1] ==# '{'
+endfu
+fu! s:StateClass.opensExpression() dict
+  return l:self.isExpressionBracket() && self.currLine[-1:-1] ==# '{'
 endfu
 fu! s:StateClass.wasCss() dict
   return get(self.prevSynstack, -1) =~# '^css'
@@ -387,16 +382,21 @@ fu! ComputeLitHtmlIndent()
   endif
 
   if (l:state.openedLitHtmlTemplate())
-    call s:debug('opened tagged template literal')
-    return indent(l:prev_lnum) + &shiftwidth
+    call s:debug('opened html template literal')
+    if (l:state.closesLitHtmlTemplate())
+      call s:debug('closes html template literal')
+      return indent(l:prev_lnum)
+    else
+      return indent(l:prev_lnum) + &shiftwidth
+    endif
   endif
 
-  if (l:state.openedJsExpression())
+  if (l:state.openedExpression())
     call s:debug('opened js expression')
     return indent(l:prev_lnum) + &shiftwidth
   endif
 
-  if (l:state.wasJsTemplateBrace() || l:state.isLitHtmlRegionCloser())
+  if (l:state.closesExpression() || l:state.isLitHtmlRegionCloser())
     " let l:indent_basis = previous matching js or template start
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:indent_basis = l:state.getIndentOfLastClose()
@@ -410,7 +410,8 @@ fu! ComputeLitHtmlIndent()
     return l:indent_basis + l:indent_delta
   endif
 
-  if ((l:state.wasJs() && !l:state.wasJsTemplateBrace()) && (l:state.isJs() && !l:state.isJsTemplateBrace()))
+  if (l:state.wasJs() && !l:state.closedExpression() && ((l:state.isJs() || l:state.opensTemplate())))
+    call s:debug("using javascript indent")
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 
