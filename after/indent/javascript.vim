@@ -158,12 +158,12 @@ fu! VHTL_countMatches(string, pattern)
 endfu
 
 function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
-  let byte = line2byte(a:l) + a:c - 1
-  let pos = index(s:synid_cache[0], byte)
-  if pos == -1
-    let s:synid_cache[:] += [[byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
+  let l:byte = line2byte(a:l) + a:c - 1
+  let l:pos = index(s:synid_cache[0], l:byte)
+  if l:pos == -1
+    let s:synid_cache[:] += [[l:byte], [synIDattr(synID(a:l, a:c, 0), 'name')]]
   endif
-  return s:synid_cache[1][pos]
+  return s:synid_cache[1][l:pos]
 endfunction
 
 " Make debug log. You can view these logs using ':messages'
@@ -175,7 +175,7 @@ endfu
 
 let s:StateClass={}
 fu! s:StateClass.new(lnum)
-  let l:instance = copy(self)
+  let l:instance = copy(l:self)
   let l:instance.currLine = a:lnum
   let l:instance.prevLine = prevnonblank(a:lnum - 1)
   let l:instance.currSynstack = VHTL_SynSOL(l:instance.currLine)
@@ -184,44 +184,44 @@ fu! s:StateClass.new(lnum)
 endfu
 
 fu! s:StateClass.startsWithTemplateClose() dict
-  return (getline(self.currSynstack)) =~# '^\s*`'
+  return (getline(l:self.currSynstack)) =~# '^\s*`'
 endfu
 
 fu! s:StateClass.openedJsExpression() dict
-  return (VHTL_getBracketDepthChange(getline(self.prevLine)) > 0)
+  return (VHTL_getBracketDepthChange(getline(l:self.prevLine)) > 0)
 endfu
 fu! s:StateClass.opensLitHtmlTemplate() dict
-  return VHTL_opensTemplate(getline(self.currLine))
+  return VHTL_opensTemplate(getline(l:self.currLine))
 endfu
 fu! s:StateClass.openedLitHtmlTemplate() dict
-  return VHTL_opensTemplate(getline(self.prevLine))
+  return VHTL_opensTemplate(getline(l:self.prevLine))
 endfu
 fu! s:StateClass.closesLitHtmlTemplate() dict
-  return VHTL_closesTemplate(getline(self.currLine))
+  return VHTL_closesTemplate(getline(l:self.currLine))
 endfu
 fu! s:StateClass.closedLitHtmlTemplate() dict
-  return VHTL_closesTemplate(getline(self.prevLine))
+  return VHTL_closesTemplate(getline(l:self.prevLine))
 endfu
 
 fu! s:StateClass.isInsideLitHtml() dict
-  return VHTL_isSynstackInsideLitHtml(self.currSynstack)
+  return VHTL_isSynstackInsideLitHtml(l:self.currSynstack)
 endfu
 fu! s:StateClass.wasInsideLitHtml() dict
-  return VHTL_isSynstackInsideLitHtml(self.prevSynstack)
+  return VHTL_isSynstackInsideLitHtml(l:self.prevSynstack)
 endfu
 fu! s:StateClass.isInsideJsx() dict
-  return IsSynstackInsideJsx(self.currSynstack)
+  return IsSynstackInsideJsx(l:self.currSynstack)
 endfu
 
 fu! s:StateClass.wasHtml() dict
-  return get(self.prevSynstack, -1) =~# '^html'
+  return get(l:self.prevSynstack, -1) =~# '^html'
 endfu
 fu! s:StateClass.isHtml() dict
-  return get(self.currSynstack, -1) =~# '^html'
+  return get(l:self.currSynstack, -1) =~# '^html'
 endfu
 fu! s:StateClass.isLitHtmlRegionCloser() dict
   " TODO this doesn't accoutn for semicolons or trailing spaces?
-  return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*`'
+  return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*`'
 endfu
 fu! s:StateClass.opensTemplate() dict
   return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*html`'
@@ -237,38 +237,38 @@ fu! s:StateClass.isJs() dict
   return get(l:self.currSynstack, -1) =~# '^js'
 endfu
 fu! s:StateClass.wasExpressionBracket() dict
-  return get(self.prevSynstack, -1) ==# 'jsTemplateBraces'
+  return get(l:self.prevSynstack, -1) ==# 'jsTemplateBraces'
 endfu
 fu! s:StateClass.isExpressionBracket() dict
-  return get(l:self.currSynstack, -1) ==# 'jsTemplateBraces'
+  return get(l:self.currSynstack, -2) ==# 'jsTemplateBraces'
 endfu
 fu! s:StateClass.closedExpression() dict
-  return l:self.wasExpressionBracket() && self.prevLine[-1:-1] ==# '}'
+  return l:self.wasExpressionBracket() && l:self.prevLine[-1:-1] ==# '}'
 endfu
 fu! s:StateClass.closesExpression() dict
-  return l:self.isExpressionBracket() && self.currLine[-1:-1] ==# '}'
+  return l:self.isExpressionBracket() && l:self.currLine[-1:-1] ==# '}'
 endfu
 fu! s:StateClass.openedExpression() dict
-  return l:self.wasExpressionBracket() && self.prevLine[-1:-1] ==# '{'
+  return l:self.wasExpressionBracket() && l:self.prevLine[-1:-1] ==# '{'
 endfu
 fu! s:StateClass.opensExpression() dict
-  return l:self.isExpressionBracket() && self.currLine[-1:-1] ==# '{'
+  return l:self.isExpressionBracket() && l:self.currLine[-1:-1] ==# '{'
 endfu
 fu! s:StateClass.wasCss() dict
-  return get(self.prevSynstack, -1) =~# '^css'
+  return get(l:self.prevSynstack, -1) =~# '^css'
 endfu
 fu! s:StateClass.isCss() dict
-  return get(self.currSynstack, -1) =~# '^css'
+  return get(l:self.currSynstack, -1) =~# '^css'
 endfu
 
 fu! s:StateClass.toStr() dict
-  return '{line ' . self.currLine . '}'
+  return '{line ' . l:self.currLine . '}'
 endfu
 
 fu! s:SkipFuncJsTemplateBraces()
   " let l:char = getline(line('.'))[col('.')-1]
   let l:syntax = s:SynAt(line('.'), col('.'))
-  if (l:syntax != 'jsTemplateBraces')
+  if (l:syntax !=# 'jsTemplateBraces')
     return 1
   endif
 endfu
@@ -276,7 +276,7 @@ endfu
 fu! s:SkipFuncLitHtmlRegion()
   " let l:char = getline(line('.'))[col('.')-1]
   let l:syntax = s:SynAt(line('.'), col('.'))
-  if (l:syntax != 'litHtmlRegion')
+  if (l:syntax !=# 'litHtmlRegion')
     return 1
   endif
 endfu
@@ -307,17 +307,17 @@ fu! s:getCloseWordsLeftToRight(lineNum)
 endfu
 
 fu! s:StateClass.getIndentDelta() dict
-  let l:closeWords = s:getCloseWordsLeftToRight(self.currLine)
+  let l:closeWords = s:getCloseWordsLeftToRight(l:self.currLine)
   if len(l:closeWords) == 0
     return 0
   endif
   let [l:closeWord, l:col] = l:closeWords[0]
-  let l:syntax = s:SynAt(self.currLine, l:col)
-  if (l:syntax == 'htmlEndTag')
+  let l:syntax = s:SynAt(l:self.currLine, l:col)
+  if (l:syntax ==# 'htmlEndTag')
     call s:debug('indent_delta: html end tag')
     return - &shiftwidth
   endif
-  if (l:syntax == 'litHtmlRegion' && 'html`' != strpart(getline(self.currLine), l:col-5, len('html`')))
+  if (l:syntax ==# 'litHtmlRegion' && 'html`' !=# strpart(getline(l:self.currLine), l:col-5, len('html`')))
     call s:debug('indent_delta: end of litHtmlRegion')
     return - &shiftwidth
   endif
@@ -327,7 +327,7 @@ endfu
 " html tag, html template, or js expression on previous line
 fu! s:StateClass.getIndentOfLastClose() dict
 
-  let l:closeWords = s:getCloseWordsLeftToRight(self.prevLine)
+  let l:closeWords = s:getCloseWordsLeftToRight(l:self.prevLine)
 
   if (len(l:closeWords) == 0)
     call s:debug('no close words found')
@@ -336,16 +336,16 @@ fu! s:StateClass.getIndentOfLastClose() dict
 
   for l:item in reverse(l:closeWords)
     let [l:closeWord, l:col] = l:item
-    let l:syntax = s:SynAt(self.prevLine, l:col)
-    call cursor(self.prevLine, l:col) " sets start point for searchpair()
+    let l:syntax = s:SynAt(l:self.prevLine, l:col)
+    call cursor(l:self.prevLine, l:col) " sets start point for searchpair()
     redraw
-    if ("}" == l:closeWord && l:syntax == 'jsTemplateBraces')
+    if ('}' ==# l:closeWord && l:syntax ==# 'jsTemplateBraces')
       call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
       call s:debug('js brace base indent')
-    elseif ("`" == l:closeWord && l:syntax == 'litHtmlRegion')
+    elseif ('`' ==# l:closeWord && l:syntax ==# 'litHtmlRegion')
       call searchpair('html`', '', '\(html\)\@<!`', 'b', 's:SkipFuncLitHtmlRegion()')
       call s:debug('lit html region base indent ')
-    elseif (l:syntax == 'htmlEndTag')
+    elseif (l:syntax ==# 'htmlEndTag')
       let l:openWord = substitute(substitute(l:closeWord, '/', '', ''), '>', '', '')
       call searchpair(l:openWord, '', l:closeWord, 'b')
       call s:debug('html tag region base indent ')
@@ -404,7 +404,7 @@ fu! ComputeLitHtmlIndent()
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:indent_basis = l:state.getIndentOfLastClose()
     if (l:indent_basis == -1)
-      call s:debug("using html indent as base indent")
+      call s:debug('using html indent as base indent')
       let l:indent_basis = HtmlIndent()
     endif
     let l:indent_delta = l:state.getIndentDelta()
