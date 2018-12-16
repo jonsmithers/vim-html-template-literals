@@ -166,12 +166,9 @@ function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
   return s:synid_cache[1][pos]
 endfunction
 
-if exists('g:VHTL_debugging')
-  set debug=msg " show errors in indentexpr
-endif
 " Make debug log. You can view these logs using ':messages'
 fu! s:debug(str)
-  if exists('g:VHTL_debugging')
+  if (exists('g:VHTL_debugging') && g:VHTL_debugging == 1)
     echom 'vhtl ' . v:lnum . ': ' . a:str
   endif
 endfu
