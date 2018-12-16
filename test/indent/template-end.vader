@@ -1,0 +1,54 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (FOLLOWING HTML TAGS);
+{
+html`
+${
+html`${
+2 + 2}`}
+<div>
+</div>
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    ${
+      html`${
+        2 + 2}`}
+    <div>
+    </div>
+  `;
+}
+
+Given javascript (CONTINUE WITH CORRECT HTML INDENT);
+{
+html`
+${
+html`${
+2 + 2}`}
+<div>
+</div>
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    ${
+      html`${
+        2 + 2}`}
+    <div>
+    </div>
+  `;
+}

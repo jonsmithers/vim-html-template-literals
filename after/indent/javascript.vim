@@ -220,7 +220,6 @@ fu! s:StateClass.isHtml() dict
   return get(l:self.currSynstack, -1) =~# '^html'
 endfu
 fu! s:StateClass.isLitHtmlRegionCloser() dict
-  " TODO this doesn't accoutn for semicolons or trailing spaces?
   return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*`'
 endfu
 fu! s:StateClass.opensTemplate() dict
@@ -230,7 +229,6 @@ fu! s:StateClass.closedTemplate() dict
   return get(l:self.prevSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.prevLine) !~# 'html`$'
 endfu
 fu! s:StateClass.wasJs() dict
-  call s:debug(string(get(l:self.prevSynstack, -1)))
   return get(l:self.prevSynstack, -1) =~# '^js'
 endfu
 fu! s:StateClass.isJs() dict
@@ -243,16 +241,16 @@ fu! s:StateClass.isExpressionBracket() dict
   return get(l:self.currSynstack, -2) ==# 'jsTemplateBraces'
 endfu
 fu! s:StateClass.closedExpression() dict
-  return l:self.wasExpressionBracket() && l:self.prevLine[-1:-1] ==# '}'
+  return l:self.wasExpressionBracket() && getline(l:self.prevLine)[-1:-1] ==# '}'
 endfu
 fu! s:StateClass.closesExpression() dict
-  return l:self.isExpressionBracket() && l:self.currLine[-1:-1] ==# '}'
+  return l:self.isExpressionBracket() &&  getline(l:self.currLine)[-1:-1] ==# '}'
 endfu
 fu! s:StateClass.openedExpression() dict
-  return l:self.wasExpressionBracket() && l:self.prevLine[-1:-1] ==# '{'
+  return l:self.wasExpressionBracket() && getline(l:self.prevLine)[-1:-1] ==# '{'
 endfu
 fu! s:StateClass.opensExpression() dict
-  return l:self.isExpressionBracket() && l:self.currLine[-1:-1] ==# '{'
+  return l:self.isExpressionBracket() &&  getline(l:self.currLine)[-1:-1] ==# '{'
 endfu
 fu! s:StateClass.wasCss() dict
   return get(l:self.prevSynstack, -1) =~# '^css'
@@ -399,7 +397,7 @@ fu! ComputeLitHtmlIndent()
     return indent(l:prev_lnum) + &shiftwidth
   endif
 
-  if (l:state.closesExpression() || l:state.isLitHtmlRegionCloser())
+  if (l:state.closedExpression() || l:state.isLitHtmlRegionCloser())
     " let l:indent_basis = previous matching js or template start
     " let l:indent_delta = -1 for starting with closing tag, template, or expression
     let l:indent_basis = l:state.getIndentOfLastClose()

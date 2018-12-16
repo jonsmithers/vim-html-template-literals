@@ -3,8 +3,6 @@ Before:
   set shiftwidth=2
   set expandtab
 
-" IT SHOULD MATCH REGION END INDENT WITH REGION START
-
 Given javascript (LITERAL WITH SINGLE NEWLINE);
 {
 html`
@@ -109,3 +107,42 @@ Expect javascript;
     <div></div>`
   more()
 }
+
+Given javascript (CONTINUE WITH CORRECT INDENTATION);
+{
+html`
+${
+html`
+<div></div>` } `;
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    ${
+      html`
+        <div></div>` } `;
+  more()
+}
+
+After:
+# Given javascript (IGNORED: LITERAL AFTER SELF-CLOSING TAG)
+# {
+# html`
+# <div/>
+# `;
+# }
+#
+# Do:
+#   =G
+#
+# Expect javascript;
+# {
+#   html`
+#     <div/>
+#   `;
+# }
