@@ -38,7 +38,7 @@ setlocal indentkeys+=`
 let s:endtag = '^\s*\/\?>\s*;\='
 
 " Get syntax stack at StartOfLine
-fu! VHTL_SynSOL(lnum)
+fu! s:VHTL_SynSOL(lnum)
   let l:col = match(getline(a:lnum), '\S')
   if (l:col == -1)
     return []
@@ -47,114 +47,12 @@ fu! VHTL_SynSOL(lnum)
 endfu
 
 " Get syntax stack at EndOfLine
-fu! VHTL_SynEOL(lnum)
+fu! s:VHTL_SynEOL(lnum)
   if (a:lnum < 1)
     return []
   endif
   let l:col = strlen(getline(a:lnum))
   return map(synstack(a:lnum, l:col), "synIDattr(v:val, 'name')")
-endfu
-
-fu! IsSynstackCss(synstack)
-  return get(a:synstack, -1) =~# '^css'
-endfu
-
-" Does synstack end with an xml syntax attribute
-fu! IsSynstackHtml(synstack)
-  return get(a:synstack, -1) =~# '^html'
-endfu
-
-fu! IsSynstackJs(synstack)
-  return get(a:synstack, -1) =~# '^js'
-endfu
-
-fu! VHTL_isSynstackInsideLitHtml(synstack)
-  for l:syntaxAttribute in reverse(copy((a:synstack)))
-    if (l:syntaxAttribute ==# 'litHtmlRegion')
-      return v:true
-    endif
-  endfor
-  return v:false
-endfu
-
-fu! IsSynstackInsideJsx(synstack)
-  for l:syntaxAttribute in reverse(copy((a:synstack)))
-    if (l:syntaxAttribute =~# '^jsx')
-      return v:true
-    endif
-  endfor
-  return v:false
-endfu
-
-fu! VHTL_startsWithTemplateEnd(linenum)
-  return (getline(a:linenum)) =~# '^\s*`'
-endfu
-
-fu! VHTL_opensTemplate(line)
-  let l:index = 0
-  let l:depth = 0
-  while v:true
-    let [l:term, l:index, l:trash] = matchstrpos(a:line, '\Mhtml`\|\\`\|`', l:index)
-    if (l:index == -1)
-      return (l:depth > 0)
-    endif
-    if (l:term ==# 'html`')
-      let l:index += len('html`')
-      let l:depth += 1
-    elseif(l:term ==# '`')
-      let l:index += len('`')
-      if (l:depth > 0)
-        let l:depth -= 1
-      endif
-    endif
-  endwhile
-endfu
-
-fu! VHTL_closesTemplate(line)
-  let l:index = 0
-  let l:depth = 0
-  while v:true
-    let [l:term, l:index, l:trash] = matchstrpos(a:line, '\Mhtml`\|\\`\|`', l:index)
-    if (l:index == -1)
-      return v:false
-    endif
-    if (l:term ==# 'html`')
-      let l:index += len('html`')
-      let l:depth += 1
-    elseif(l:term ==# '`')
-      let l:index += len('`')
-      let l:depth -= 1
-      if (l:depth < 0)
-        return v:true
-      endif
-    endif
-  endwhile
-endfu
-
-fu! VHTL_closesTag(line)
-  return (-1 != match(a:line, '^\s*<\/'))
-  " todo: what about <div></div></div> ?
-endfu
-
-fu! VHTL_getHtmlTemplateDepthChange(line)
-  let l:templateOpeners = VHTL_countMatches(a:line, 'html`')
-  let l:escapedTics     = VHTL_countMatches(a:line, '\M\\`')
-  let l:templateClosers = VHTL_countMatches(a:line, '`') - l:templateOpeners - l:escapedTics
-  let l:depth = l:templateOpeners - l:templateClosers
-  return l:depth
-endfu
-
-fu! VHTL_countMatches(string, pattern)
-  let l:count = 0
-  let l:lastMatch = -1
-  while v:true
-    let l:lastMatch = match(a:string, a:pattern, l:lastMatch+1)
-    if (-1 == l:lastMatch)
-      return l:count
-    else
-      let l:count += 1
-    endif
-  endwhile
 endfu
 
 function! s:SynAt(l,c) " from $VIMRUNTIME/indent/javascript.vim
@@ -178,8 +76,8 @@ fu! s:StateClass.new(lnum)
   let l:instance = copy(l:self)
   let l:instance.currLine = a:lnum
   let l:instance.prevLine = prevnonblank(a:lnum - 1)
-  let l:instance.currSynstack = VHTL_SynSOL(l:instance.currLine)
-  let l:instance.prevSynstack = VHTL_SynEOL(l:instance.prevLine)
+  let l:instance.currSynstack = s:VHTL_SynSOL(l:instance.currLine)
+  let l:instance.prevSynstack = s:VHTL_SynEOL(l:instance.prevLine)
   return l:instance
 endfu
 
@@ -190,27 +88,41 @@ endfu
 fu! s:StateClass.openedJsExpression() dict
   return (VHTL_getBracketDepthChange(getline(l:self.prevLine)) > 0)
 endfu
-fu! s:StateClass.opensLitHtmlTemplate() dict
-  return VHTL_opensTemplate(getline(l:self.currLine))
-endfu
 fu! s:StateClass.openedLitHtmlTemplate() dict
-  return VHTL_opensTemplate(getline(l:self.prevLine))
-endfu
-fu! s:StateClass.closesLitHtmlTemplate() dict
-  return VHTL_closesTemplate(getline(l:self.currLine))
-endfu
-fu! s:StateClass.closedLitHtmlTemplate() dict
-  return VHTL_closesTemplate(getline(l:self.prevLine))
+  let l:index = 0
+  let l:depth = 0
+  while v:true
+    let [l:term, l:index, l:trash] = matchstrpos(getline(l:self.prevLine), '\Mhtml`\|\\`\|`', l:index)
+    if (l:index == -1)
+      return (l:depth > 0)
+    endif
+    if (l:term ==# 'html`')
+      let l:index += len('html`')
+      let l:depth += 1
+    elseif(l:term ==# '`')
+      let l:index += len('`')
+      if (l:depth > 0)
+        let l:depth -= 1
+      endif
+    endif
+  endwhile
 endfu
 
 fu! s:StateClass.isInsideLitHtml() dict
-  return VHTL_isSynstackInsideLitHtml(l:self.currSynstack)
+  for l:syntaxAttribute in reverse(copy(l:self.currSynstack))
+    if (l:syntaxAttribute ==# 'litHtmlRegion')
+      return v:true
+    endif
+  endfor
+  return v:false
 endfu
 fu! s:StateClass.wasInsideLitHtml() dict
-  return VHTL_isSynstackInsideLitHtml(l:self.prevSynstack)
-endfu
-fu! s:StateClass.isInsideJsx() dict
-  return IsSynstackInsideJsx(l:self.currSynstack)
+  for l:syntaxAttribute in reverse(copy(l:self.prevSynstack))
+    if (l:syntaxAttribute ==# 'litHtmlRegion')
+      return v:true
+    endif
+  endfor
+  return v:false
 endfu
 
 fu! s:StateClass.wasHtml() dict
