@@ -1,0 +1,12 @@
+
+"                (IT SHOULD CORRECTLY INDENT...)
+Given javascript (COMMENTED TEMPLATES):
+  // html`
+  // <div></div>`;
+
+Do:
+  =G
+
+Expect javascript:
+  // html`
+  // <div></div>`;

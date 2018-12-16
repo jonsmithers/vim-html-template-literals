@@ -3,6 +3,7 @@ Before:
   set shiftwidth=2
   set expandtab
 
+"                (IT SHOULD CORRECTLY INDENT...)
 Given javascript (LITERAL WITH SINGLE NEWLINE);
 {
 html`
@@ -108,7 +109,7 @@ Expect javascript;
   more()
 }
 
-Given javascript (CONTINUE WITH CORRECT INDENTATION);
+Given javascript (NEXT LINE AFTER LITERAL);
 {
 html`
 ${

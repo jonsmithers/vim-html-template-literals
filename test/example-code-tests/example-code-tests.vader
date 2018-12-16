@@ -1,0 +1,369 @@
+" This test file is not used for regular testing because the tests here are
+" generally very large in scope and thus not helpful in telling you what's
+" actually failing.
+
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (html in html);
+html`
+<div>
+<div> </div>
+</div>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+html`
+  <div>
+    <div> </div>
+  </div>
+`;
+
+Given javascript (close template and tag);
+ html`
+ <div>
+ ${when(condition, html`
+ <span></span>`)}
+ </div>`;
+ js();
+
+Do:
+  =G
+
+Expect javascript;
+html`
+  <div>
+    ${when(condition, html`
+      <span></span>`)}
+  </div>`;
+js();
+
+Given javascript (text line inside xml);
+html`
+  <div>
+  simple text
+  </div>
+  `;
+
+Do:
+  =G
+
+Expect javascript;
+html`
+  <div>
+    simple text
+  </div>
+`;
+
+Given javascript (sparse text lines inside xml):
+  html`
+  <div id="setup">
+  
+  text one
+  
+  text two
+  
+  </div>
+  `
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+    <div id="setup">
+  
+      text one
+  
+      text two
+
+    </div>
+  `
+
+Given javascript (nested css);
+ html`
+ <style include="module">
+ element {
+   background: green;
+ }
+ .class {
+   border: red;
+ }
+ #id {
+ opacity: 0.5
+ }
+ </style>
+ <div>
+ <paper-button></paper-button>
+ </div>
+ `
+
+Do:
+  =G
+
+Expect javascript;
+html`
+  <style include="module">
+    element {
+      background: green;
+    }
+    .class {
+      border: red;
+    }
+    #id {
+      opacity: 0.5
+    }
+  </style>
+  <div>
+    <paper-button></paper-button>
+  </div>
+`
+
+Given javascript (lit-html readme example 1);
+const render = () => html`
+${when(state === 'loading',
+html`<div>Loading...</div>`,
+html`<p>${message}</p>`)}
+`;
+
+Do:
+  =G
+
+Expect javascript;
+const render = () => html`
+  ${when(state === 'loading',
+    html`<div>Loading...</div>`,
+    html`<p>${message}</p>`)}
+`;
+
+Given javascript (lit-html readme example 2);
+const render = () => html`
+<ul>
+${repeat(items, (i) => i.id, (i, index) => html`
+<li>${index}: ${i.name}</li>`)}
+</ul>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+const render = () => html`
+  <ul>
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+  </ul>
+`;
+
+Given javascript (lit-html readme example 3);
+const render = () => html`
+<p>
+${until(
+fetch('content.txt').then((r) => r.text()),
+html`<span>Loading...</span>`)}
+</p>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+const render = () => html`
+  <p>
+    ${until(
+      fetch('content.txt').then((r) => r.text()),
+      html`<span>Loading...</span>`)}
+  </p>
+`;
+
+
+Given javascript (nuances with closing brackets and templates):
+  html`
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+    <div> DEDENT THIS LINE ONCE </div>
+    <div>
+      <div>as usual</div>
+      ${this.ternary ? html`
+        <div>indented</div>
+      ` : html`
+        <div>also indented</div>
+      `}
+      <div> DO NOT DEDENT THIS LINE </div>
+    </div>
+  `
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+    ${repeat(items, (i) => i.id, (i, index) => html`
+      <li>${index}: ${i.name}</li>`)}
+    <div> DEDENT THIS LINE ONCE </div>
+    <div>
+      <div>as usual</div>
+      ${this.ternary ? html`
+        <div>indented</div>
+      ` : html`
+        <div>also indented</div>
+      `}
+      <div> DO NOT DEDENT THIS LINE </div>
+    </div>
+  `
+
+Given javascript (adjacent js expressions):
+  html`
+    ${console.log(null)}
+    ${console.log('this line should have equal indentation')}
+  `
+Do:
+  =G
+
+Expect javascript:
+  html`
+    ${console.log(null)}
+    ${console.log('this line should have equal indentation')}
+  `
+
+Given javascript(multiple dedents after closing js expression):
+  html`
+    <div>
+      ${ test 
+        ? html`<p>one</p>`
+        : html`
+          <p>
+            two
+          </p>`}
+    </div>
+    <span> dedent THRICE here </span>
+  `;
+
+Do:
+  =G
+
+Expect javascript:
+  html`
+    <div>
+      ${ test 
+        ? html`<p>one</p>`
+        : html`
+          <p>
+            two
+          </p>`}
+    </div>
+    <span> dedent THRICE here </span>
+  `;
+
+" " This test fails because vim-javascript doesn't correctly indent ternaries inside ${ }
+" Given javascript (subsequent templates):
+"   html`
+"     ${user.isloggedIn
+"         ? html`Welcome ${user.name}`
+"         : html`Please log in`
+"     }
+"   `;
+"       html`
+"         <ul>
+"           ${items.map((i) => html`<li>${i}</li>`)}
+"         </ul>
+"       `;
+"
+" Do:
+"   =G
+"
+" Expect javascript:
+"   html`
+"     ${user.isloggedIn
+"         ? html`Welcome ${user.name}`
+"         : html`Please log in`
+"     }
+"   `;
+"   html`
+"     <ul>
+"       ${items.map((i) => html`<li>${i}</li>`)}
+"     </ul>
+"   `;
+
+
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (multiple syntaxes on one line);
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
+Do:
+  =G
+
+Expect javascript;
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
+Given javascript (tricky indnetation);
+return html`
+  <div> Files </div>
+  ${!this.fileList ? 
+      html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          fetch notes
+        </paper-button>
+      ` : html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          refresh
+        </paper-button>
+        ${repeat(this.fileList || [], null, (file) => html`
+          <paper-item on-click=${() => this.onFileClick(file.path)} data="${file}">${file.name}</paper-item>
+        `)}
+      `}
+    <style>
+      paper-fab#newFile {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+      background-color: red;
+    }
+  </style>
+  <paper-fab icon="add" id="newFile" on-click=${()=>this.onNewFileClick()}></paper-fab>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+return html`
+  <div> Files </div>
+  ${!this.fileList ? 
+      html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          fetch notes
+        </paper-button>
+      ` : html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          refresh
+        </paper-button>
+        ${repeat(this.fileList || [], null, (file) => html`
+          <paper-item on-click=${() => this.onFileClick(file.path)} data="${file}">${file.name}</paper-item>
+        `)}
+      `}
+    <style>
+      paper-fab#newFile {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+      background-color: red;
+    }
+  </style>
+  <paper-fab icon="add" id="newFile" on-click=${()=>this.onNewFileClick()}></paper-fab>
+`;
+
+

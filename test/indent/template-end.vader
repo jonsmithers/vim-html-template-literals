@@ -3,32 +3,8 @@ Before:
   set shiftwidth=2
   set expandtab
 
-Given javascript (FOLLOWING HTML TAGS);
-{
-html`
-${
-html`${
-2 + 2}`}
-<div>
-</div>
-`;
-}
-
-Do:
-  =G
-
-Expect javascript;
-{
-  html`
-    ${
-      html`${
-        2 + 2}`}
-    <div>
-    </div>
-  `;
-}
-
-Given javascript (CONTINUE WITH CORRECT HTML INDENT);
+"                (IT SHOULD CORRECTLY INDENT...)
+Given javascript (NEXT LINE OF HTML);
 {
 html`
 ${
