@@ -224,14 +224,17 @@ fu! s:StateClass.isLitHtmlRegionCloser() dict
   return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*`'
 endfu
 fu! s:StateClass.opensTemplate() dict
-  return get(self.currSynstack, -1) ==# 'litHtmlRegion' && getline(self.currLine) =~# '^\s*html`'
+  return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*html`'
+endfu
+fu! s:StateClass.closedTemplate() dict
+  return get(l:self.prevSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.prevLine) !~# 'html`$'
 endfu
 fu! s:StateClass.wasJs() dict
-  call s:debug(string(get(self.prevSynstack, -1)))
-  return get(self.prevSynstack, -1) =~# '^js' || get(self.prevSynstack, -1) =~# '^javaScript'
+  call s:debug(string(get(l:self.prevSynstack, -1)))
+  return get(l:self.prevSynstack, -1) =~# '^js'
 endfu
 fu! s:StateClass.isJs() dict
-  return get(self.currSynstack, -1) =~# '^js' || get(self.currSynstack, -1) =~# '^javaScript'
+  return get(l:self.currSynstack, -1) =~# '^js'
 endfu
 fu! s:StateClass.wasExpressionBracket() dict
   return get(self.prevSynstack, -1) ==# 'jsTemplateBraces'
@@ -380,10 +383,13 @@ fu! ComputeLitHtmlIndent()
 
   if (l:state.openedLitHtmlTemplate())
     call s:debug('opened html template literal')
-    if (l:state.closesLitHtmlTemplate())
-      call s:debug('closes html template literal')
+    if (getline(l:state.currLine) =~# '^\s*`')
+      " The first character closes template on previous line. This is a tiny
+      " but very common edge case when typing out a new template from scratch.
+      call s:debug('closes html template literal in first character')
       return indent(l:prev_lnum)
     else
+      call s:debug('first line of template is always indented')
       return indent(l:prev_lnum) + &shiftwidth
     endif
   endif
@@ -407,8 +413,8 @@ fu! ComputeLitHtmlIndent()
     return l:indent_basis + l:indent_delta
   endif
 
-  if (l:state.wasJs() && !l:state.closedExpression() && ((l:state.isJs() || l:state.opensTemplate())))
-    call s:debug("using javascript indent")
+  if (((l:state.wasJs() && !l:state.closedExpression()) || l:state.closedTemplate()) && ((l:state.isJs() || l:state.opensTemplate())))
+    call s:debug('using javascript indent')
     return eval(b:litHtmlOriginalIndentExpression)
   endif
 

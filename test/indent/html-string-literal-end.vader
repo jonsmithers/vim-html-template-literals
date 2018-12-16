@@ -54,3 +54,58 @@ Expect javascript;
     <img />
   `;
 }
+
+Given javascript (LITERAL AT END OF LINE, NO SEMICOLON);
+{
+html`
+<div>
+</div>`
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+    </div>`
+  more()
+}
+
+Given javascript (LITERAL AT END OF LINE, WITH SEMICOLON);
+{
+html`
+<div>
+</div>`;
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+    </div>`;
+  more()
+}
+
+Given javascript (LITERAL AT END OF ONLY LINE);
+{
+html`
+<div></div>`
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div></div>`
+  more()
+}
