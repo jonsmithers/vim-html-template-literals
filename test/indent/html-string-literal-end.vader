@@ -1,0 +1,149 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+"                (IT SHOULD CORRECTLY INDENT...)
+Given javascript (LITERAL WITH SINGLE NEWLINE);
+{
+html`
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+  `;
+}
+
+Given javascript (LITERAL WITH SINGLE HTML TAG);
+{
+html`
+<div></div>
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div></div>
+  `;
+}
+
+
+Given javascript (LITERAL WITH SINGLE SELF CLOSING TAG);
+{
+html`
+<img />
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <img />
+  `;
+}
+
+Given javascript (LITERAL AT END OF LINE, NO SEMICOLON);
+{
+html`
+<div>
+</div>`
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+    </div>`
+  more()
+}
+
+Given javascript (LITERAL AT END OF LINE, WITH SEMICOLON);
+{
+html`
+<div>
+</div>`;
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+    </div>`;
+  more()
+}
+
+Given javascript (LITERAL AT END OF ONLY LINE);
+{
+html`
+<div></div>`
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div></div>`
+  more()
+}
+
+Given javascript (NEXT LINE AFTER LITERAL);
+{
+html`
+${
+html`
+<div></div>` } `;
+more()
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    ${
+      html`
+        <div></div>` } `;
+  more()
+}
+
+After:
+# Given javascript (IGNORED: LITERAL AFTER SELF-CLOSING TAG)
+# {
+# html`
+# <div/>
+# `;
+# }
+#
+# Do:
+#   =G
+#
+# Expect javascript;
+# {
+#   html`
+#     <div/>
+#   `;
+# }

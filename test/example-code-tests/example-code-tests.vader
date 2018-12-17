@@ -1,3 +1,7 @@
+" This test file is not used for regular testing because the tests here are
+" generally very large in scope and thus not helpful in telling you what's
+" actually failing.
+
 Before:
   set tabstop=2
   set shiftwidth=2
@@ -285,3 +289,81 @@ Expect javascript:
 "       ${items.map((i) => html`<li>${i}</li>`)}
 "     </ul>
 "   `;
+
+
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+Given javascript (multiple syntaxes on one line);
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
+Do:
+  =G
+
+Expect javascript;
+return html`<style>.mood { color: green; }</style>
+  Web Components are 
+  <span class="mood">${mood}</span>!`;
+
+Given javascript (tricky indnetation);
+return html`
+  <div> Files </div>
+  ${!this.fileList ? 
+      html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          fetch notes
+        </paper-button>
+      ` : html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          refresh
+        </paper-button>
+        ${repeat(this.fileList || [], null, (file) => html`
+          <paper-item on-click=${() => this.onFileClick(file.path)} data="${file}">${file.name}</paper-item>
+        `)}
+      `}
+    <style>
+      paper-fab#newFile {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+      background-color: red;
+    }
+  </style>
+  <paper-fab icon="add" id="newFile" on-click=${()=>this.onNewFileClick()}></paper-fab>
+`;
+
+Do:
+  =G
+
+Expect javascript;
+return html`
+  <div> Files </div>
+  ${!this.fileList ? 
+      html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          fetch notes
+        </paper-button>
+      ` : html`
+        <paper-button on-click=${() => this.onFetchBtn()}>
+          refresh
+        </paper-button>
+        ${repeat(this.fileList || [], null, (file) => html`
+          <paper-item on-click=${() => this.onFileClick(file.path)} data="${file}">${file.name}</paper-item>
+        `)}
+      `}
+    <style>
+      paper-fab#newFile {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+      background-color: red;
+    }
+  </style>
+  <paper-fab icon="add" id="newFile" on-click=${()=>this.onNewFileClick()}></paper-fab>
+`;
+
+

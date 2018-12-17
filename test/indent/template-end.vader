@@ -1,0 +1,30 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+"                (IT SHOULD CORRECTLY INDENT...)
+Given javascript (NEXT LINE OF HTML);
+{
+html`
+${
+html`${
+2 + 2}`}
+<div>
+</div>
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    ${
+      html`${
+        2 + 2}`}
+    <div>
+    </div>
+  `;
+}

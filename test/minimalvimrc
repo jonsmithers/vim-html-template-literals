@@ -5,4 +5,11 @@ call plug#begin('~/.vim/plugged')
     Plug 'pangloss/vim-javascript'
 call plug#end()
 syntax enable
+let g:VHTL_debugging = 1
 let g:html_indent_style1 = "inc"
+
+nmap <F10> :echo map(synstack(line("."), col(".")), "synIDattr(v:val, 'name')")<cr>
+
+set tabstop=2
+set shiftwidth=2
+set expandtab
