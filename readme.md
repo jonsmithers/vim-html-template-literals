@@ -25,8 +25,8 @@ html-indenting`.
 
 ## Known Issues
 
-- The indentation logic still has some kinks.
-  <!-- The boundaries between js and html (``html`...` `` and `${...}`) are
-  rather tricky. -->
+- Indentation in TypeScript is not implemented yet.
+- Indentation in general still has some kinks. If you see an issue, please
+  report it.
 - This plugin conflicts a bit with vim-jsx. Having both installed
   simultaneously may result in undesired indentation behaviors.
