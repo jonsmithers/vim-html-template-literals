@@ -1,0 +1,18 @@
+html-template-literals.txt
+
+HTML Template Literals                                  *html-template-literals*
+
+==============================================================================
+INTRODUCTION
+
+This plugin amends javascript or typescript syntax definitions to include an
+html template string region to be treated as html code. Syntax highlighting
+and auto-indentation inside these regions will mirror what you'd see in an
+html file.
+
+==============================================================================
+CONFIGURATION
+
+g:htl_all_templates                                        *g:htl_all_templates*
+
+  Experimental! Enables html syntax for ALL html template strings.

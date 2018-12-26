@@ -8,22 +8,17 @@ function! htmltemplateliterals#amendSyntax(options)
     let b:current_syntax=s:current_syntax
   endif
 
-  if (a:options.typescript == 1)
-    syntax region litHtmlRegion
-          \ contains=@HTMLSyntax,typescriptInterpolation
-          \ start=+html`+
-          \ skip=+\\`+
-          \ end=+`+
-          \ extend
-          \ keepend
-  else
-    syntax region litHtmlRegion
-          \ contains=@HTMLSyntax,jsTemplateExpression
-          \ start=+html`+
-          \ skip=+\\`+
-          \ end=+`+
-          \ extend
-          \ keepend
+  let l:all_templates=(exists('g:htl_all_templates') && g:htl_all_templates)
+  exec 'syntax region litHtmlRegion 
+        \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation' : 'jsTemplateExpression') . '
+        \ start=' . (l:all_templates ? '+\(html\)\?`+' : '+html`+') . '
+        \ skip=+\\`+
+        \ end=+`+
+        \ extend
+        \ keepend
+        \ '
+  if (l:all_templates)
+    hi def link litHtmlRegion String
   endif
 
   if (a:options.typescript)
