@@ -6,7 +6,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'leafgarland/typescript-vim'
 call plug#end()
 syntax enable
-let g:VHTL_debugging = 1
+let g:htl_debug = 1
 let g:html_indent_style1 = "inc"
 
 nmap <F10> :echo map(synstack(line("."), col(".")), "synIDattr(v:val, 'name')")<cr>

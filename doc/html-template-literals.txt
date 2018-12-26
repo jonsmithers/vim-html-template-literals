@@ -1,23 +1,26 @@
 html-template-literals.txt
-
-HTML Template Literals                                  *html-template-literals*
-
+HTML TEMPLATE LITERALS       *vim-html-template-literals* *html-template-literals*
 ==============================================================================
-INTRODUCTION
 
 This plugin amends javascript or typescript syntax definitions to include an
-html template string region to be treated as html code. Syntax highlighting and
-auto-indentation inside these regions will mirror what you'd see for html code
-in an html file.
+html template string region to be treated as html code. Syntax highlighting
+and auto-indentation inside these regions will mirror what you'd see for html
+code in an html file.
 
 There is compatibility only for the following syntax plugins:
 
 * pangloss/vim-javascript           https://github.com/pangloss/vim-javascript
 * leafgarland/typescript-vim     https://github.com/leafgarland/typescript-vim
 
+
+CONFIGURATION                             *html-template-literals-configuration*
 ==============================================================================
-CONFIGURATION
 
 g:htl_all_templates                                        *g:htl_all_templates*
 
-  Experimental! Enables html syntax for ALL html template strings.
+    Experimental! Enables html syntax for ALL html template strings.
+
+g:htl_debug                                                        *g:htl_debug*
+
+    Log debugging information allowing you trace the code path used to indent
+    each line by viewing :messages.
