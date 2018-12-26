@@ -6,9 +6,14 @@ HTML Template Literals                                  *html-template-literals*
 INTRODUCTION
 
 This plugin amends javascript or typescript syntax definitions to include an
-html template string region to be treated as html code. Syntax highlighting
-and auto-indentation inside these regions will mirror what you'd see in an
-html file.
+html template string region to be treated as html code. Syntax highlighting and
+auto-indentation inside these regions will mirror what you'd see for html code
+in an html file.
+
+There is compatibility only for the following syntax plugins:
+
+* pangloss/vim-javascript           https://github.com/pangloss/vim-javascript
+* leafgarland/typescript-vim     https://github.com/leafgarland/typescript-vim
 
 ==============================================================================
 CONFIGURATION

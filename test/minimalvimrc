@@ -3,6 +3,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'junegunn/vader.vim'
     Plug 'jonsmithers/vim-html-template-literals', { 'dir': '~/git/vim-html-template-literals' }
     Plug 'pangloss/vim-javascript'
+    Plug 'leafgarland/typescript-vim'
 call plug#end()
 syntax enable
 let g:VHTL_debugging = 1
