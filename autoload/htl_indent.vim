@@ -68,8 +68,8 @@ endfunction
 
 " Make debug log. You can view these logs using ':messages'
 fu! s:debug(str)
-  if (exists('g:VHTL_debugging') && g:VHTL_debugging == 1)
-    echom 'vhtl ' . v:lnum . ': ' . a:str
+  if (exists('g:htl_debug') && g:htl_debug == 1)
+    echom 'htl ' . v:lnum . ': ' . a:str
   endif
 endfu
 
