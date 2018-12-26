@@ -1,41 +1,45 @@
-" Description: Vim lit-html indent file
-" Language: JavaScript
+" Description: Vim html-template-string indent amendments
 " Maintainer: Jon Smithers <mail@jonsmithers.link>
 
-" Save the current JavaScript indentexpr.
-let b:litHtmlOriginalIndentExpression = &indentexpr
+function! htl_indent#amendIndentation(options)
+  let b:htl_options = a:options
 
-" import xml indent
-if exists('b:did_indent')
-  let s:did_indent=b:did_indent
-  unlet b:did_indent
-endif
-exe 'runtime! indent/html.vim'
-if exists('s:did_indent')
-  let b:did_indent=s:did_indent
-endif
+  " Save the current JavaScript indentexpr.
+  let b:litHtmlOriginalIndentExpression = &indentexpr
 
-" import css indent
-if exists('b:did_indent')
-  let s:did_indent=b:did_indent
-  unlet b:did_indent
-endif
-exe 'runtime! indent/css.vim'
-if exists('s:did_indent')
-  let b:did_indent=s:did_indent
-endif
+  " import html indent
+  if exists('b:did_indent')
+    let s:did_indent=b:did_indent
+    unlet b:did_indent
+  endif
+  exe 'runtime! indent/html.vim'
+  if exists('s:did_indent')
+    let b:did_indent=s:did_indent
+  endif
 
-setlocal indentexpr=ComputeLitHtmlIndent()
+  " import css indent
+  if exists('b:did_indent')
+    let s:did_indent=b:did_indent
+    unlet b:did_indent
+  endif
+  exe 'runtime! indent/css.vim'
+  if exists('s:did_indent')
+    let b:did_indent=s:did_indent
+  endif
 
-" JS indentkeys
-setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
-" XML indentkeys
-setlocal indentkeys+=*<Return>,<>>,<<>,/
-" lit-html indentkeys
-setlocal indentkeys+=`
+  setlocal indentexpr=ComputeLitHtmlIndent()
 
-" Multiline end tag regex (line beginning with '>' or '/>')
-let s:endtag = '^\s*\/\?>\s*;\='
+  " JS indentkeys
+  setlocal indentkeys=0{,0},0),0],0\,,!^F,o,O,e
+  " XML indentkeys
+  setlocal indentkeys+=*<Return>,<>>,<<>,/
+  " lit-html indentkeys
+  setlocal indentkeys+=`
+
+  " Multiline end tag regex (line beginning with '>' or '/>')
+  let s:endtag = '^\s*\/\?>\s*;\='
+
+endfunction
 
 " Get syntax stack at StartOfLine
 fu! s:VHTL_SynSOL(lnum)
