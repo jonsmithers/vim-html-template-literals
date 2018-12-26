@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
+
+rm ./**/*typescript.vader 2> /dev/null
+for javascriptTest in indent/*.vader; do
+  typescriptTest=$(echo "$javascriptTest" | sed -E 's/.vader$/-typescript.vader/')
+
+  cat > "$typescriptTest" <<- END_HEADER
+	=================================
+	== THIS FILE IS AUTO-GENERATED ==
+	=================================
+	END_HEADER
+
+  cat < "$javascriptTest" \
+    | sed -E 's/Given javascript/Given typescript/' \
+    | sed -E 's/Expect javascript/Expect typescript/' \
+    >> "$typescriptTest"
+done
 
 if [[ "$CI" = true ]]; then
   export VADER_OUTPUT_FILE='testresults.txt'

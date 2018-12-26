@@ -2,7 +2,8 @@
 " Maintainer: Jon Smithers <mail@jonsmithers.link>
 
 function! htl_indent#amend(options)
-  let b:htl_options = a:options
+  let b:htl_js                 = a:options.typescript ? '^\(typescript\|foldBraces$\)'     : '^js'
+  let b:htl_expression_bracket = a:options.typescript ? 'typescriptInterpolationDelimiter' : 'jsTemplateBraces'
 
   " Save the current JavaScript indentexpr.
   let b:litHtmlOriginalIndentExpression = &indentexpr
@@ -35,9 +36,6 @@ function! htl_indent#amend(options)
   setlocal indentkeys+=*<Return>,<>>,<<>,/
   " lit-html indentkeys
   setlocal indentkeys+=`
-
-  " Multiline end tag regex (line beginning with '>' or '/>')
-  let s:endtag = '^\s*\/\?>\s*;\='
 
 endfunction
 
@@ -145,16 +143,16 @@ fu! s:StateClass.closedTemplate() dict
   return get(l:self.prevSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.prevLine) !~# 'html`$'
 endfu
 fu! s:StateClass.wasJs() dict
-  return get(l:self.prevSynstack, -1) =~# '^js'
+  return get(l:self.prevSynstack, -1) =~# b:htl_js
 endfu
 fu! s:StateClass.isJs() dict
-  return get(l:self.currSynstack, -1) =~# '^js'
+  return get(l:self.currSynstack, -1) =~# b:htl_js
 endfu
 fu! s:StateClass.wasExpressionBracket() dict
-  return get(l:self.prevSynstack, -1) ==# 'jsTemplateBraces'
+  return get(l:self.prevSynstack, -1) ==# b:htl_expression_bracket
 endfu
 fu! s:StateClass.isExpressionBracket() dict
-  return get(l:self.currSynstack, -2) ==# 'jsTemplateBraces'
+  return get(l:self.currSynstack, -2) ==# b:htl_expression_bracket
 endfu
 fu! s:StateClass.closedExpression() dict
   return l:self.wasExpressionBracket() && getline(l:self.prevLine)[-1:-1] ==# '}'
@@ -182,7 +180,7 @@ endfu
 fu! s:SkipFuncJsTemplateBraces()
   " let l:char = getline(line('.'))[col('.')-1]
   let l:syntax = s:SynAt(line('.'), col('.'))
-  if (l:syntax !=# 'jsTemplateBraces')
+  if (l:syntax !=# b:htl_expression_bracket)
     return 1
   endif
 endfu
@@ -253,7 +251,7 @@ fu! s:StateClass.getIndentOfLastClose() dict
     let l:syntax = s:SynAt(l:self.prevLine, l:col)
     call cursor(l:self.prevLine, l:col) " sets start point for searchpair()
     redraw
-    if ('}' ==# l:closeWord && l:syntax ==# 'jsTemplateBraces')
+    if ('}' ==# l:closeWord && l:syntax ==# b:htl_expression_bracket)
       call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
       call s:debug('js brace base indent')
     elseif ('`' ==# l:closeWord && l:syntax ==# 'litHtmlRegion')
