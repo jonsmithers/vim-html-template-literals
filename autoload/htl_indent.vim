@@ -1,7 +1,7 @@
 " Description: Vim html-template-string indent amendments
 " Maintainer: Jon Smithers <mail@jonsmithers.link>
 
-function! htl_indent#amendIndentation(options)
+function! htl_indent#amend(options)
   let b:htl_options = a:options
 
   " Save the current JavaScript indentexpr.

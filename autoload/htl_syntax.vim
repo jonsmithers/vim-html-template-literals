@@ -1,4 +1,4 @@
-function! htmltemplateliterals#amendSyntax(options)
+function! htl_syntax#amend(options)
   if exists('b:current_syntax')
     let s:current_syntax=b:current_syntax
     unlet b:current_syntax
