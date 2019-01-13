@@ -8,6 +8,13 @@ function! htl_syntax#amend(options)
     let b:current_syntax=s:current_syntax
   endif
 
+  if (&filetype ==# 'javascript.jsx')
+    " sourcing html syntax will re-source javascript syntax because html has
+    " <script> tags. However, re-sourcing javascript will erase jsx
+    " modifications, so we need to additionally re-source jsx syntax.
+    runtime syntax/jsx.vim
+  endif
+
   let l:all_templates=(exists('g:htl_all_templates') && g:htl_all_templates)
   exec 'syntax region litHtmlRegion 
         \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation' : 'jsTemplateExpression') . '
