@@ -4,7 +4,7 @@ Before:
   set expandtab
 
 "                (IT SHOULD CORRECTLY INDENT...)
-Given javascript (NEXT LINE OF HTML);
+Given javascript (NEXT LINE OF OPENING HTML);
 {
 html`
 ${
@@ -28,3 +28,75 @@ Expect javascript;
     </div>
   `;
 }
+
+Given javascript (NEXT LINE OF SELF-CLOSING HTML);
+{
+html`
+<div>
+${x}
+<a></a>
+</div>
+`
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+      ${x}
+      <a></a>
+    </div>
+  `
+}
+
+Given javascript (NEXT LINE OF CLOSING HTML);
+{
+html`
+<div>
+<span>
+${x}
+</span></div>
+`
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+      <span>
+        ${x}
+      </span></div>
+  `
+}
+
+
+Given javascript (NEXT LINE OF HTML AFTER EXPRESSION TERMINATOR AT EOL);
+{
+html`
+<div>
+${
+1 + 2}
+<div></div>
+</div>`
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+      ${
+        1 + 2}
+      <div></div>
+    </div>`
+}
+
+

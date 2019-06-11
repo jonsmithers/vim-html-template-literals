@@ -54,7 +54,7 @@ Expect javascript;
   `;
 }
 
-Given javascript (LITERAL AT END OF LINE, NO SEMICOLON);
+Given javascript (LITERAL TERMINATOR AT EOL, NO SEMICOLON);
 {
 html`
 <div>
@@ -73,7 +73,7 @@ Expect javascript;
   more()
 }
 
-Given javascript (LITERAL AT END OF LINE, WITH SEMICOLON);
+Given javascript (LITERAL TERMINATOR AT EOL, WITH SEMICOLON);
 {
 html`
 <div>
@@ -92,7 +92,7 @@ Expect javascript;
   more()
 }
 
-Given javascript (LITERAL AT END OF ONLY LINE);
+Given javascript (LITERAL TERMINATOR AT END OF ONLY LINE);
 {
 html`
 <div></div>`
