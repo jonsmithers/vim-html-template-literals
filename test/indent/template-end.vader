@@ -4,7 +4,7 @@ Before:
   set expandtab
 
 "                (IT SHOULD CORRECTLY INDENT...)
-Given javascript (NEXT LINE OF HTML);
+Given javascript (NEXT LINE OF SAME-INDENT HTML);
 {
 html`
 ${
@@ -27,4 +27,27 @@ Expect javascript;
     <div>
     </div>
   `;
+}
+
+Given javascript (NEXT LINE OF INDENTED HTML);
+{
+html`
+<div>
+${x}
+<a></a>
+</div>
+`
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  html`
+    <div>
+      ${x}
+      <a></a>
+    </div>
+  `
 }
