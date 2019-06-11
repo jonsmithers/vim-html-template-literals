@@ -31,3 +31,20 @@ html-indenting`.
   report it.
 - This plugin conflicts a bit with vim-jsx. Having both installed
   simultaneously may result in undesired indentation behaviors.
+  
+## Tips
+
+- You can configure the [vim-closetag] plugin to work inside html template
+  literals:
+
+  ```vim
+  let g:closetag_filetypes = 'html,xhtml,phtml,javascript,typescript'
+  let g:closetag_regions = {
+        \ 'typescript.tsx': 'jsxRegion,tsxRegion,litHtmlRegion',
+        \ 'javascript.jsx': 'jsxRegion,litHtmlRegion',
+        \ 'javascript':     'litHtmlRegion',
+        \ 'typescript':     'litHtmlRegion',
+        \ }
+  ```
+
+[vim-closetag]: https://github.com/alvan/vim-closetag
