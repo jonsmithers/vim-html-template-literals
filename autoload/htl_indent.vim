@@ -250,7 +250,6 @@ fu! s:StateClass.getIndentOfLastClose() dict
     let [l:closeWord, l:col] = l:item
     let l:syntax = s:SynAt(l:self.prevLine, l:col)
     call cursor(l:self.prevLine, l:col) " sets start point for searchpair()
-    redraw
     if ('}' ==# l:closeWord && l:syntax ==# b:htl_expression_bracket)
       call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
       call s:debug('js brace base indent')
