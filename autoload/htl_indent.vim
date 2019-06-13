@@ -185,6 +185,11 @@ fu! s:SkipFuncJsTemplateBraces()
   endif
 endfu
 
+fu! s:SkipFuncHtmlTag()
+  " call s:debug('SkipFuncHtmlTag col ' . col('.') . ': ' . synIDattr(synID(line('.'), col('.'), 0), 'name'))
+  return (synIDattr(synID(line('.'), col('.'), 0), 'name') !~# '^html')
+endfu
+
 fu! s:SkipFuncLitHtmlRegion()
   " let l:char = getline(line('.'))[col('.')-1]
   let l:syntax = s:SynAt(line('.'), col('.'))
@@ -221,18 +226,33 @@ endfu
 fu! s:StateClass.getIndentDelta() dict
   let l:closeWords = s:getCloseWordsLeftToRight(l:self.currLine)
   if len(l:closeWords) == 0
+    call s:debug('getIndentDelta: no closeWords')
     return 0
   endif
   let [l:closeWord, l:col] = l:closeWords[0]
   let l:syntax = s:SynAt(l:self.currLine, l:col)
   if (l:syntax ==# 'htmlEndTag')
-    call s:debug('indent_delta: html end tag')
-    return - &shiftwidth
+
+    let l:openWord = substitute(substitute(l:closeWord, '/', '', ''), '>', '', '')
+    call cursor(l:self.currLine, l:col) " set start point for searchpair()
+    call searchpair(l:openWord, '', l:closeWord, 'b', 's:SkipFuncHtmlTag()')
+    " call searchpair(l:openWord, '', l:closeWord, 'b')
+    call s:debug('closeword ' . l:closeWord)
+    if (line('.') ==# l:self.currLine)
+      call s:debug('getIndentDelta: self-closed html tag')
+      call s:debug(line('.'))
+      return 0
+    else
+      call s:debug('getIndentDelta: closing html tag!!!')
+      call s:debug(line('.'))
+      return - &shiftwidth
+    endif
   endif
   if (l:syntax ==# 'litHtmlRegion' && 'html`' !=# strpart(getline(l:self.currLine), l:col-5, len('html`')))
-    call s:debug('indent_delta: end of litHtmlRegion')
+    call s:debug('getIndentDelta: end of litHtmlRegion')
     return - &shiftwidth
   endif
+  call s:debug('getIndentDelta: no delta found')
   return 0
 endfu
 
@@ -242,7 +262,7 @@ fu! s:StateClass.getIndentOfLastClose() dict
   let l:closeWords = s:getCloseWordsLeftToRight(l:self.prevLine)
 
   if (len(l:closeWords) == 0)
-    call s:debug('no close words found')
+    call s:debug('getIndentOfLastClose: no close words found')
     return -1
   endif
 
@@ -252,16 +272,16 @@ fu! s:StateClass.getIndentOfLastClose() dict
     call cursor(l:self.prevLine, l:col) " sets start point for searchpair()
     if ('}' ==# l:closeWord && l:syntax ==# b:htl_expression_bracket)
       call searchpair('{', '', '}', 'b', 's:SkipFuncJsTemplateBraces()')
-      call s:debug('js brace base indent')
+      call s:debug('getIndentOfLastClose: js brace base indent')
     elseif ('`' ==# l:closeWord && l:syntax ==# 'litHtmlRegion')
       call searchpair('html`', '', '\(html\)\@<!`', 'b', 's:SkipFuncLitHtmlRegion()')
-      call s:debug('lit html region base indent ')
+      call s:debug('getIndentOfLastClose: lit html region base indent ')
     elseif (l:syntax ==# 'htmlEndTag')
       let l:openWord = substitute(substitute(l:closeWord, '/', '', ''), '>', '', '')
-      call searchpair(l:openWord, '', l:closeWord, 'b')
-      call s:debug('html tag region base indent ')
+      call searchpair(l:openWord, '', l:closeWord, 'b', 's:SkipFuncHtmlTag()')
+      call s:debug('getIndentOfLastClose: html tag region base indent ')
     else
-      call s:debug("UNRECOGNIZED CLOSER SYNTAX: '" . l:syntax . "'")
+      call s:debug('getIndentOfLastClose: UNRECOGNIZED CLOSER SYNTAX: "' . l:syntax . '"')
     endif
     return indent(line('.')) " cursor was moved by searchpair()
   endfor
