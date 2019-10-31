@@ -18,7 +18,7 @@ CONFIGURATION                             *html-template-literals-configuration*
 
 g:htl_all_templates                                        *g:htl_all_templates*
 
-    Experimental! Enables html syntax for ALL html template strings.
+    Experimental! Enables html syntax for ALL template string literals.
 
 g:htl_debug                                                        *g:htl_debug*
 
