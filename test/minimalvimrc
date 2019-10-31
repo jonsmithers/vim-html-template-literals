@@ -1,13 +1,21 @@
 set nocompatible
+
+let s:directory = '~/git/vim-html-template-literals'
+
+if (empty(glob(s:directory)))
+  echo '"' . s:directory . '" does not exist'
+  :cquit
+endif
+
 call plug#begin('~/.vim/plugged')
     Plug 'junegunn/vader.vim'
-    Plug 'jonsmithers/vim-html-template-literals', { 'dir': '~/git/vim-html-template-literals' }
+    exec "Plug 'jonsmithers/vim-html-template-literals', { 'dir': '" . s:directory . "' }"
     Plug 'pangloss/vim-javascript'
     Plug 'leafgarland/typescript-vim'
 call plug#end()
 syntax enable
 let g:htl_debug = 1
-let g:html_indent_style1 = "inc"
+let g:html_indent_style1 = 'inc'
 
 nmap <F10> :echo map(synstack(line("."), col(".")), "synIDattr(v:val, 'name')")<cr>
 
