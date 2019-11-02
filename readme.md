@@ -25,6 +25,13 @@ _NOTE_: it's generally a good idea to have `let g:html_indent_style1 = "inc"` in
 your vimrc for reasonable indentation of `<style>` tags. See `:help
 html-indenting`.
 
+## Configuration
+
+| Flag                  | Description                                                                                                           |
+| --------------------  | --------------------------------------------------------------------------------------------------------------------- |
+| `g:htl_css_templates` | Enable css syntax inside css-tagged template literals (`` css`...` ``) (auto-indent is currently not supported here). |
+| `g:htl_all_templates` | (Experimental) Enable html syntax inside _all_ template literals (`` `...` ``).                                       |
+
 ## Known Issues
 
 - Indentation in general still has some kinks. If you see an issue, please

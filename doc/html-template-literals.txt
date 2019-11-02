@@ -18,7 +18,11 @@ CONFIGURATION                             *html-template-literals-configuration*
 
 g:htl_all_templates                                        *g:htl_all_templates*
 
-    Experimental! Enables html syntax for ALL template string literals.
+    Experimental! Enables html syntax for ALL template literals.
+
+g:htl_css_templates                                        *g:htl_css_templates*
+
+    Enable css syntax for template literals tagged with `css`.
 
 g:htl_debug                                                        *g:htl_debug*
 
