@@ -2,9 +2,11 @@
 
 cd "$(dirname "$0")" || exit 1
 
-rm ./**/*typescript.vader 2> /dev/null
-for javascriptTest in indent/*.vader; do
-  typescriptTest=$(echo "$javascriptTest" | sed -E 's/.vader$/-typescript.vader/')
+rm -r ./ts
+for javascriptTest in js/indent/*.vader; do
+  typescriptTest=$(echo "$javascriptTest" | sed -E 's#^js/#ts/#' | sed -E 's/.vader$/-typescript.vader/')
+
+  mkdir -p "$(dirname "$typescriptTest")"
 
   cat > "$typescriptTest" <<- END_HEADER
 	=================================
@@ -18,9 +20,32 @@ for javascriptTest in indent/*.vader; do
     >> "$typescriptTest"
 done
 
-if [[ "$CI" = true ]]; then
-  export VADER_OUTPUT_FILE='testresults.txt'
-  vim -u <(cat minimalvimrc) +'Vader! indent/*.vader'
-else
-  vim -u <(cat minimalvimrc) +'Vader  indent/*.vader'
-fi
+for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 'ts,' 'js,'; do
+  TEST_CONFIG_ARRAY=(${TEST_CONFIG//,/ })
+  TEST_DIR=${TEST_CONFIG_ARRAY[0]}
+  SYNTAX_PLUGIN=${TEST_CONFIG_ARRAY[1]}
+  
+
+  if [[ -n $SYNTAX_PLUGIN ]]; then
+    echo "running $TEST_DIR tests with plugin \"$SYNTAX_PLUGIN\""
+  else
+    echo "running $TEST_DIR tests with no syntax plugin"
+  fi
+
+  export SYNTAX_PLUGIN
+
+  output=$(vim -u <(cat minimalvimrc) +'Vader! '"$TEST_DIR"'/**/*.vader' 2>&1)
+  exit_code=$?
+  if [[ $exit_code != 0 ]]; then
+    echo tests failed
+    if [[ "$CI" != true ]]; then
+      echo showing failed tests in vim 
+      vim -u <(cat minimalvimrc) +'Vader '"$TEST_DIR"'/**/*.vader'
+    else
+      echo "$output"
+    fi
+    exit 1
+  else
+    echo tests passed
+  fi
+done

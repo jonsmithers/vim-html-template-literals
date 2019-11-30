@@ -10,8 +10,9 @@ endif
 call plug#begin('~/.vim/plugged')
     Plug 'junegunn/vader.vim'
     exec "Plug 'jonsmithers/vim-html-template-literals', { 'dir': '" . s:directory . "' }"
-    Plug 'pangloss/vim-javascript'
-    Plug 'leafgarland/typescript-vim'
+    if !empty($SYNTAX_PLUGIN)
+      exec "Plug '".$SYNTAX_PLUGIN."'"
+    endif
 call plug#end()
 syntax enable
 let g:htl_debug = 1
