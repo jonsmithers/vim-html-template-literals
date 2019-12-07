@@ -55,8 +55,7 @@ Expect javascript:
   }
 
 
-" @ignore-ts-test-for-plugin=none
-
+" @ignore-ts-test-for-plugin=none (native typescript plugin doesn't work correctly)
 Given javascript (LITERAL TERMINATOR AT EOL, NO SEMICOLON):
   {
   html`
@@ -75,10 +74,9 @@ Expect javascript:
       </div>`
     more()
   }
-
 " @end-ignore-ts
 
-" @ignore-ts-test-for-plugin=none
+" @ignore-ts-test-for-plugin=none (native typescript plugin doesn't work correctly)
 Given javascript (LITERAL TERMINATOR AT EOL, WITH SEMICOLON):
   {
   html`
@@ -97,33 +95,36 @@ Expect javascript:
       </div>`;
     more()
   }
+" @end-ignore-ts
 
-
-Given javascript (LITERAL TERMINATOR AT END OF ONLY LINE);
-{
-html`
-<div></div>`
-more()
-}
+" @ignore-ts-test-for-plugin=none (native typescript plugin doesn't work correctly)
+Given javascript (LITERAL TERMINATOR AT END OF ONLY LINE):
+  {
+  html`
+  <div></div>`
+  more()
+  }
 
 Do:
   =G
 
-Expect javascript;
-{
-  html`
-    <div></div>`
-  more()
-}
+Expect javascript:
+  {
+    html`
+      <div></div>`
+    more()
+  }
+" @end-ignore-ts
 
-Given javascript (NEXT LINE AFTER LITERAL);
-{
-html`
-${
-html`
-<div></div>` } `;
-more()
-}
+" @ignore-ts-test-for-plugin=none (native typescript plugin doesn't work correctly)
+Given javascript (NEXT LINE AFTER LITERAL):
+  {
+  html`
+  ${
+  html`
+  <div></div>` } `;
+  more()
+  }
 
 Do:
   =G
@@ -136,7 +137,6 @@ Expect javascript:
           <div></div>` } `;
     more()
   }
-
 " @end-ignore-ts
 
 After:
