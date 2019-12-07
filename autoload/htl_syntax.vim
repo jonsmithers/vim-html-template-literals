@@ -31,7 +31,8 @@ function! htl_syntax#amend(options)
   endif
 
   exec 'syntax region litHtmlRegion
-        \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation' : 'jsTemplateExpression') . '
+        \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
+        \ containedin=typescriptBlock
         \ start=' . (l:all_templates ? '+\(html\)\?`+' : '+html`+') . '
         \ skip=+\\`+
         \ end=+`+
@@ -44,27 +45,28 @@ function! htl_syntax#amend(options)
 
   if (a:options.typescript)
     syn cluster typescriptExpression add=litHtmlRegion
+    " syn cluster typescriptBlock      add=litHtmlRegion
   else
     syn cluster jsExpression         add=litHtmlRegion
   endif
 
   " allow js interpolation (${...}) inside html strings
   if (a:options.typescript)
-    syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=typescriptInterpolation keepend containedin=htmlString,htmlComment
+    syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=typescriptInterpolation,typescriptTemplateSubstitution keepend containedin=htmlString,htmlComment
   else
     syntax region jsTemplateExpressionLitHtmlWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression    keepend containedin=htmlString,htmlComment
   endif
 
   " prevent htmlValue from overextending because it will match on js expression
   if (a:options.typescript)
-    syntax region jsTemplateExpressionAsHtmlValue start=+=[\t ]*${+ end=++ contains=typescriptInterpolation containedin=htmlTag
+    syntax region jsTemplateExpressionAsHtmlValue start=+=[\t ]*${+ end=++ contains=typescriptInterpolation,typescriptTemplateSubstitution containedin=htmlTag
   else
     syntax region jsTemplateExpressionAsHtmlValue start=+=[\t ]*${+ end=++ contains=jsTemplateExpression    containedin=htmlTag
   endif
 
   if (l:css_templates)
     exec 'syntax region cssLiteral
-          \ contains=@CSSSyntax,' . (a:options.typescript ? 'typescriptInterpolation' : 'jsTemplateExpression') . '
+          \ contains=@CSSSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
           \ start=+css`+
           \ skip=+\\`+
           \ end=+`+
@@ -80,7 +82,7 @@ function! htl_syntax#amend(options)
 
     " allow js interpolation (${...}) inside css attributes
     if (a:options.typescript)
-      syntax region cssTemplateExpressionWrapper contained start=+${+ end=+}+ contains=typescriptInterpolation keepend containedin=cssAttrRegion
+      syntax region cssTemplateExpressionWrapper contained start=+${+ end=+}+ contains=typescriptInterpolation,typescriptTemplateSubstitution keepend containedin=cssAttrRegion
     else
       syntax region cssTemplateExpressionWrapper contained start=+${+ end=+}+ contains=jsTemplateExpression    keepend containedin=cssAttrRegion
     endif

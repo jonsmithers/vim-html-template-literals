@@ -2,37 +2,41 @@
 
 cd "$(dirname "$0")" || exit 1
 
-rm -r ./ts
-for javascriptTest in js/indent/*.vader; do
-  typescriptTest=$(echo "$javascriptTest" | sed -E 's#^js/#ts/#' | sed -E 's/.vader$/-typescript.vader/')
+generateTypeScriptTests() {
+  rm -r ./ts
+  for javascriptTest in js/indent/*.vader; do
+    typescriptTest=$(echo "$javascriptTest" | sed -E 's#^js/#ts/#' | sed -E 's/.vader$/-typescript.vader/')
 
-  mkdir -p "$(dirname "$typescriptTest")"
+    mkdir -p "$(dirname "$typescriptTest")"
 
-  cat > "$typescriptTest" <<- END_HEADER
-	=================================
-	== THIS FILE IS AUTO-GENERATED ==
-	=================================
-	END_HEADER
+    cat > "$typescriptTest" <<- END_HEADER
+			=================================
+			== THIS FILE IS AUTO-GENERATED ==
+			=================================
+		END_HEADER
 
-  cat < "$javascriptTest" \
-    | sed -E 's/Given javascript/Given typescript/' \
-    | sed -E 's/Expect javascript/Expect typescript/' \
-    >> "$typescriptTest"
-done
+    escaped_syntax_plugin=$(echo "$SYNTAX_PLUGIN" | sed 's#/#\\/#')
 
-for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 'ts,' 'js,'; do
+    cat < "$javascriptTest" \
+      | sed -E 's/Given javascript/Given typescript/' \
+      | sed -E 's/Expect javascript/Expect typescript/' \
+      | sed "/@ignore-ts-test-for-plugin=$escaped_syntax_plugin/,/@end-ignore-ts/d" \
+      >> "$typescriptTest"
+  done
+}
+
+for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 'ts,none'; do
   TEST_CONFIG_ARRAY=(${TEST_CONFIG//,/ })
   TEST_DIR=${TEST_CONFIG_ARRAY[0]}
   SYNTAX_PLUGIN=${TEST_CONFIG_ARRAY[1]}
-  
 
-  if [[ -n $SYNTAX_PLUGIN ]]; then
-    echo "running $TEST_DIR tests with plugin \"$SYNTAX_PLUGIN\""
-  else
-    echo "running $TEST_DIR tests with no syntax plugin"
-  fi
+  echo "running $TEST_DIR tests with syntax plugin \"$SYNTAX_PLUGIN\""
 
   export SYNTAX_PLUGIN
+
+  if [[ $TEST_DIR = "ts" ]]; then
+    generateTypeScriptTests
+  fi
 
   output=$(vim -u <(cat minimalvimrc) +'Vader! '"$TEST_DIR"'/**/*.vader' 2>&1)
   exit_code=$?

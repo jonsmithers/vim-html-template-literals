@@ -37,60 +37,67 @@ Expect javascript;
 }
 
 
-Given javascript (LITERAL WITH SINGLE SELF CLOSING TAG);
-{
-html`
-<img />
-`;
-}
-
-Do:
-  =G
-
-Expect javascript;
-{
+Given javascript (LITERAL WITH SINGLE SELF CLOSING TAG):
+  {
   html`
-    <img />
+  <img />
   `;
-}
-
-Given javascript (LITERAL TERMINATOR AT EOL, NO SEMICOLON);
-{
-html`
-<div>
-</div>`
-more()
-}
+  }
 
 Do:
   =G
 
-Expect javascript;
-{
-  html`
-    <div>
-    </div>`
-  more()
-}
+Expect javascript:
+  {
+    html`
+      <img />
+    `;
+  }
 
-Given javascript (LITERAL TERMINATOR AT EOL, WITH SEMICOLON);
-{
-html`
-<div>
-</div>`;
-more()
-}
+
+" @ignore-ts-test-for-plugin=none
+
+Given javascript (LITERAL TERMINATOR AT EOL, NO SEMICOLON):
+  {
+  html`
+  <div>
+  </div>`
+  more()
+  }
 
 Do:
   =G
 
-Expect javascript;
-{
+Expect javascript:
+  {
+    html`
+      <div>
+      </div>`
+    more()
+  }
+
+" @end-ignore-ts
+
+" @ignore-ts-test-for-plugin=none
+Given javascript (LITERAL TERMINATOR AT EOL, WITH SEMICOLON):
+  {
   html`
-    <div>
-    </div>`;
+  <div>
+  </div>`;
   more()
-}
+  }
+
+Do:
+  =G
+
+Expect javascript:
+  {
+    html`
+      <div>
+      </div>`;
+    more()
+  }
+
 
 Given javascript (LITERAL TERMINATOR AT END OF ONLY LINE);
 {
@@ -121,14 +128,16 @@ more()
 Do:
   =G
 
-Expect javascript;
-{
-  html`
-    ${
-      html`
-        <div></div>` } `;
-  more()
-}
+Expect javascript:
+  {
+    html`
+      ${
+        html`
+          <div></div>` } `;
+    more()
+  }
+
+" @end-ignore-ts
 
 After:
 # Given javascript (IGNORED: LITERAL AFTER SELF-CLOSING TAG)

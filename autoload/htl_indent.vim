@@ -1,9 +1,13 @@
 " Description: Vim html-template-string indent amendments
 " Maintainer: Jon Smithers <mail@jonsmithers.link>
 
+if (exists('g:htl_debug') && g:htl_debug == 1)
+  exec 'command! HTLReload :source ' . expand('<sfile>') . ' | :edit'
+endif
+
 function! htl_indent#amend(options)
   let b:htl_js                 = a:options.typescript ? '^\(typescript\|foldBraces$\)'     : '^js'
-  let b:htl_expression_bracket = a:options.typescript ? 'typescriptInterpolationDelimiter' : 'jsTemplateBraces'
+  let b:htl_expression_bracket = a:options.typescript ? '\(typescriptInterpolationDelimiter\|typescriptTemplateSB\)' : 'jsTemplateBraces'
 
   " Save the current JavaScript indentexpr.
   let b:litHtmlOriginalIndentExpression = &indentexpr
@@ -149,10 +153,10 @@ fu! s:StateClass.isJs() dict
   return get(l:self.currSynstack, -1) =~# b:htl_js
 endfu
 fu! s:StateClass.wasExpressionBracket() dict
-  return get(l:self.prevSynstack, -1) ==# b:htl_expression_bracket
+  return get(l:self.prevSynstack, -1) =~# b:htl_expression_bracket
 endfu
 fu! s:StateClass.isExpressionBracket() dict
-  return get(l:self.currSynstack, -2) ==# b:htl_expression_bracket
+  return get(l:self.currSynstack, -2) =~# b:htl_expression_bracket
 endfu
 fu! s:StateClass.closedExpression() dict
   return l:self.wasExpressionBracket() && getline(l:self.prevLine)[-1:-1] ==# '}'
@@ -180,7 +184,7 @@ endfu
 fu! s:SkipFuncJsTemplateBraces()
   " let l:char = getline(line('.'))[col('.')-1]
   let l:syntax = s:SynAt(line('.'), col('.'))
-  if (l:syntax !=# b:htl_expression_bracket)
+  if (l:syntax !~# b:htl_expression_bracket)
     return 1
   endif
 endfu
@@ -270,7 +274,7 @@ fu! s:StateClass.getIndentOfLastClose() dict
     let [l:closeWord, l:col] = l:item
     let l:syntax = s:SynAt(l:self.prevLine, l:col)
     call cursor(l:self.prevLine, l:col) " sets start point for searchpair()
-    if ('}' ==# l:closeWord && l:syntax ==# b:htl_expression_bracket)
+    if ('}' ==# l:closeWord && l:syntax =~# b:htl_expression_bracket)
       call searchpair('{', '', '}', 'bW', 's:SkipFuncJsTemplateBraces()')
       call s:debug('getIndentOfLastClose: js brace base indent')
     elseif ('`' ==# l:closeWord && l:syntax ==# 'litHtmlRegion')

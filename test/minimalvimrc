@@ -10,7 +10,7 @@ endif
 call plug#begin('~/.vim/plugged')
     Plug 'junegunn/vader.vim'
     exec "Plug 'jonsmithers/vim-html-template-literals', { 'dir': '" . s:directory . "' }"
-    if !empty($SYNTAX_PLUGIN)
+    if !empty($SYNTAX_PLUGIN) && 'none' !=# $SYNTAX_PLUGIN
       exec "Plug '".$SYNTAX_PLUGIN."'"
     endif
 call plug#end()
