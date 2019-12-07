@@ -11,8 +11,7 @@ literals, as seen in [lit-html] and [Polymer 3].
 - JavaScript string interpolation (`${...}`)
 - nested templates (``` html`${html`${}`}` ```)
 
-Syntax for ``css`...` `` is also supported, however indentation behavior is
-currently not implemented.
+See [Configuration](#configuration) for support for css tagged literals (``css`...` ``).
 
 ## Installation
 
@@ -35,10 +34,10 @@ html-indenting`.
 
 ## Configuration
 
-| Flag                  | Description                                                                                                           |
-| --------------------  | --------------------------------------------------------------------------------------------------------------------- |
-| `g:htl_css_templates` | Enable css syntax inside css-tagged template literals (`` css`...` ``) (auto-indent is currently not supported here). |
-| `g:htl_all_templates` | (Experimental) Enable html syntax inside _all_ template literals (`` `...` ``).                                       |
+| Flag                  | Description                                                                                                                |
+| --------------------  | -------------------------------------------------------------------------------------------------------------------------- |
+| `g:htl_css_templates` | Enable css syntax inside css-tagged template literals (`` css`...` ``). Indentation behavior is currently not implemented. |
+| `g:htl_all_templates` | (Experimental) Enable html syntax inside _all_ template literals (`` `...` ``).                                            |
 
 ## Known Issues
 
