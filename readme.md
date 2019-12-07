@@ -1,28 +1,36 @@
 # HTML Template Literals
+
 Syntax highlighting and indentation for html inside of tagged template
-literals, as seen in [lit-html](https://github.com/Polymer/lit-html) and
-[Polymer 3](https://polymer-library.polymer-project.org/3.0/docs/about_30).
+literals, as seen in [lit-html] and [Polymer 3].
+
+[lit-html]: https://lit-html.polymer-project.org
+[Polymer 3]: https://polymer-library.polymer-project.org/3.0/docs/about_30
 
 ## Supported Syntaxes inside ``html`...` ``
 - HTML (including CSS embedded in `<style>` tags)
 - JavaScript string interpolation (`${...}`)
 - nested templates (``` html`${html`${}`}` ```)
 
+Syntax for ``css`...` `` is also supported, however indentation behavior is
+currently not implemented.
+
 ## Installation
 
-This plugin requires
-[vim-javascript](https://github.com/pangloss/vim-javascript) (or
-[typescript-vim](https://github.com/leafgarland/typescript-vim) if you're using
-typescript). If you use [vim-plug](https://github.com/junegunn/vim-plug) for
-package management, installation looks like this:
+This plugin requires [vim-javascript] (or [typescript-vim] if you're using
+typescript _and your vim is roughly older than 8.1.2365). If you use [vim-plug]
+for package management, installation looks like this:
+
+[vim-javascript]: https://github.com/pangloss/vim-javascript
+[typescript-vim]: https://github.com/leafgarland/typescript-vim
+[vim-plug]: https://github.com/junegunn/vim-plug
 
 ```vim
 Plug 'jonsmithers/vim-html-template-literals'
 Plug 'pangloss/vim-javascript'
 ```
 
-_NOTE_: it's generally a good idea to have `let g:html_indent_style1 = "inc"` in
-your vimrc for reasonable indentation of `<style>` tags. See `:help
+_NOTE_: it's generally a good idea to have `let g:html_indent_style1 = "inc"`
+in your vimrc for reasonable indentation of `<style>` tags. See `:help
 html-indenting`.
 
 ## Configuration
