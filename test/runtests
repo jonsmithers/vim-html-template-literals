@@ -2,6 +2,10 @@
 
 cd "$(dirname "$0")" || exit 1
 
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NORMAL='\033[0m'
+
 generateTypeScriptTests() {
   rm -r ./ts
   for javascriptTest in js/indent/*.vader; do
@@ -30,6 +34,7 @@ for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 
   TEST_DIR=${TEST_CONFIG_ARRAY[0]}
   SYNTAX_PLUGIN=${TEST_CONFIG_ARRAY[1]}
 
+  echo
   echo "running $TEST_DIR tests with syntax plugin \"$SYNTAX_PLUGIN\""
 
   export SYNTAX_PLUGIN
@@ -43,6 +48,7 @@ for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 
   if [[ $exit_code != 0 ]]; then
     echo tests failed
     if [[ "$CI" != true ]]; then
+      echo -e " ${RED}✗ tests failed${NORMAL}"
       echo showing failed tests in vim 
       vim -u <(cat minimalvimrc) +'Vader '"$TEST_DIR"'/**/*.vader'
     else
@@ -50,6 +56,6 @@ for TEST_CONFIG in 'js,pangloss/vim-javascript' 'ts,leafgarland/typescript-vim' 
     fi
     exit 1
   else
-    echo tests passed
+    echo -e " ${GREEN}✓ tests passed${NORMAL}"
   fi
 done
