@@ -4,6 +4,7 @@ cd "$(dirname "$0")" || exit 1
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NORMAL='\033[0m'
 
 generateTypeScriptTests() {
@@ -26,6 +27,11 @@ generateTypeScriptTests() {
       | sed -E 's/Expect javascript/Expect typescript/' \
       | sed "/@ignore-ts-test-for-plugin=$escaped_syntax_plugin/,/@end-ignore-ts/d" \
       >> "$typescriptTest"
+
+    skipCount=$(cat < "$javascriptTest" | grep -c "@ignore-ts-test-for-plugin=$escaped_syntax_plugin")
+    if [[ "$skipCount" -ne 0 ]]; then
+      echo -e "(${YELLOW}skipping $skipCount tests${NORMAL})"
+    fi
   done
 }
 
