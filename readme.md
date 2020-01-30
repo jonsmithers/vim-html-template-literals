@@ -16,8 +16,8 @@ See [Configuration](#configuration) for support for css tagged literals (``css`.
 ## Installation
 
 This plugin requires [vim-javascript] (or [typescript-vim] if you're using
-typescript _and your vim is roughly older than 8.1.2365). If you use [vim-plug]
-for package management, installation looks like this:
+typescript). If you use [vim-plug] for package management, installation looks
+like this:
 
 [vim-javascript]: https://github.com/pangloss/vim-javascript
 [typescript-vim]: https://github.com/leafgarland/typescript-vim
@@ -45,6 +45,10 @@ html-indenting`.
   report it.
 - This plugin conflicts a bit with vim-jsx. Having both installed
   simultaneously may result in undesired indentation behaviors.
+- A patch in vim 8.1 introduced native typescript support in Vim. However, its
+  region definitions are less precise and it's not easy to translate
+  vim-html-template-literals indentation behavior to work with Vim's native
+  typescript region definitions.
   
 ## Tips
 
