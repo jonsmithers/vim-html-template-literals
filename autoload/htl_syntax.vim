@@ -7,7 +7,11 @@ function! htl_syntax#amend(options)
     let s:current_syntax=b:current_syntax
     unlet b:current_syntax
   endif
+  let g:main_syntax = 'java'
   syn include @HTMLSyntax syntax/html.vim
+  unlet g:main_syntax
+  " we let/unlet g:main_syntax as a hack to prevent syntax/html.vim from
+  " re-sourcing syntax/javascript.vim
   if exists('s:current_syntax')
     let b:current_syntax=s:current_syntax
   endif
@@ -21,13 +25,6 @@ function! htl_syntax#amend(options)
     if exists('s:current_syntax')
       let b:current_syntax=s:current_syntax
     endif
-  endif
-
-  if (&filetype ==# 'javascript.jsx')
-    " sourcing html syntax will re-source javascript syntax because html has
-    " <script> tags. However, re-sourcing javascript will erase jsx
-    " modifications, so we need to additionally re-source jsx syntax.
-    runtime syntax/jsx.vim
   endif
 
   exec 'syntax region litHtmlRegion
