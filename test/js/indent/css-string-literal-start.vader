@@ -2,6 +2,7 @@ Before:
   set tabstop=2
   set shiftwidth=2
   set expandtab
+  let g:htl_css_templates = v:true
 
 "                (IT SHOULD CORRECTLY INDENT...)
 Given javascript (COMMENTED TEMPLATES):
