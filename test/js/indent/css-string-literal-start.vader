@@ -1,0 +1,53 @@
+Before:
+  set tabstop=2
+  set shiftwidth=2
+  set expandtab
+
+"                (IT SHOULD CORRECTLY INDENT...)
+Given javascript (COMMENTED TEMPLATES):
+  // css`
+  // .class {
+  // }`;
+
+Do:
+  =G
+
+Expect javascript:
+  // css`
+  // .class {
+  // }`;
+
+Given javascript (LITERAL WITH SINGLE NEWLINE);
+{
+css`
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  css`
+  `;
+}
+
+Given javascript (LITERAL WITH EMPTY CSS RULE);
+{
+css`
+#id {
+}
+`;
+}
+
+Do:
+  =G
+
+Expect javascript;
+{
+  css`
+    #id {
+    }
+  `;
+}
+

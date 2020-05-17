@@ -5,6 +5,8 @@ if (exists('g:htl_debug') && g:htl_debug == 1)
   exec 'command! HTLReload :source ' . expand('<sfile>') . ' | :edit'
 endif
 
+let s:css_templates_enabled = exists('g:htl_css_templates') && g:htl_css_templates
+
 function! htl_indent#amend(options)
   let b:htl_js                 = a:options.typescript ? '^\(typescript\|foldBraces$\)'     : '^js'
   let b:htl_expression_bracket = a:options.typescript ? '\(typescriptInterpolationDelimiter\|typescriptTemplateSB\)' : 'jsTemplateBraces'
@@ -31,6 +33,8 @@ function! htl_indent#amend(options)
   if exists('s:did_indent')
     let b:did_indent=s:did_indent
   endif
+
+  let b:GetCSSIndent = &indentexpr
 
   setlocal indentexpr=ComputeLitHtmlIndent()
 
@@ -113,6 +117,10 @@ fu! s:StateClass.openedLitHtmlTemplate() dict
     endif
   endwhile
 endfu
+fu! s:StateClass.openedCssTaggedLiteral() dict
+  let l:matchIndex = match(getline(l:self.prevLine), 'css`\s*$')
+  return l:matchIndex != -1
+endfu
 
 fu! s:StateClass.isInsideLitHtml() dict
   for l:syntaxAttribute in reverse(copy(l:self.currSynstack))
@@ -130,6 +138,22 @@ fu! s:StateClass.wasInsideLitHtml() dict
   endfor
   return v:false
 endfu
+fu! s:StateClass.isInsideCssTaggedLiteral() dict
+  for l:syntaxAttribute in reverse(copy(l:self.currSynstack))
+    if (l:syntaxAttribute ==# 'cssTaggedLiteral')
+      return v:true
+    endif
+  endfor
+  return v:false
+endfu
+fu! s:StateClass.wasInsideCssTaggedLiteral() dict
+  for l:syntaxAttribute in reverse(copy(l:self.prevSynstack))
+    if (l:syntaxAttribute ==# 'cssTaggedLiteral')
+      return v:true
+    endif
+  endfor
+  return v:false
+endfu
 
 fu! s:StateClass.wasHtml() dict
   return get(l:self.prevSynstack, -1) =~# '^html'
@@ -139,6 +163,9 @@ fu! s:StateClass.isHtml() dict
 endfu
 fu! s:StateClass.isLitHtmlRegionCloser() dict
   return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*`'
+endfu
+fu! s:StateClass.isCssTaggedLiteralCloser() dict
+  return get(l:self.currSynstack, -1) ==# 'cssTaggedLiteral' && getline(l:self.currLine) =~# '^\s*`'
 endfu
 fu! s:StateClass.opensTemplate() dict
   return get(l:self.currSynstack, -1) ==# 'litHtmlRegion' && getline(l:self.currLine) =~# '^\s*html`'
@@ -305,6 +332,20 @@ fu! ComputeLitHtmlIndent()
 
   if (!l:state.isInsideLitHtml() && !l:state.wasInsideLitHtml())
     call s:debug('outside of litHtmlRegion: ' . b:litHtmlOriginalIndentExpression)
+
+    if (l:state.isInsideCssTaggedLiteral())
+      call s:debug('we inside a css literal')
+      call s:debug('css eval says ' . eval(b:GetCSSIndent))
+      if (l:state.openedCssTaggedLiteral())
+        call s:debug('opened css tagged literal')
+        return indent(l:prev_lnum) + &shiftwidth
+      endif
+      return eval(b:GetCSSIndent)
+    endif
+
+    if (l:state.isCssTaggedLiteralCloser())
+
+    endif
 
     if (exists('b:hi_indent') && has_key(b:hi_indent, 'blocklnr'))
       call remove(b:hi_indent, 'blocklnr')
