@@ -1,7 +1,7 @@
 function! htl_syntax#amend(options)
 
-  let l:css_templates  =(exists('g:htl_css_templates')  && g:htl_css_templates)
-  let l:all_templates =(exists('g:htl_all_templates') && g:htl_all_templates)
+  let l:css_templates = (exists('g:htl_css_templates') && g:htl_css_templates)
+  let l:all_templates = (exists('g:htl_all_templates') && g:htl_all_templates)
 
   if exists('b:current_syntax')
     let s:current_syntax=b:current_syntax
@@ -11,7 +11,8 @@ function! htl_syntax#amend(options)
   syn include @HTMLSyntax syntax/html.vim
   unlet g:main_syntax
   " we let/unlet g:main_syntax as a hack to prevent syntax/html.vim from
-  " re-sourcing syntax/javascript.vim
+  " re-sourcing syntax/javascript.vim. It also prevents syntax/html.vim from
+  " ovoverridding syn-sync.
   if exists('s:current_syntax')
     let b:current_syntax=s:current_syntax
   endif
@@ -21,7 +22,11 @@ function! htl_syntax#amend(options)
       let s:current_syntax=b:current_syntax
       unlet b:current_syntax
     endif
+    let g:main_syntax = 'not css'
     syn include @CSSSyntax syntax/css.vim
+    unlet g:main_syntax
+    " we let/unlet g:main_syntax to prevent syntax/css.vim from overridding
+    " syn-sync.
     if exists('s:current_syntax')
       let b:current_syntax=s:current_syntax
     endif
