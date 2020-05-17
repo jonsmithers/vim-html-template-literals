@@ -67,7 +67,7 @@ function! htl_syntax#amend(options)
   endif
 
   if (l:css_templates)
-    exec 'syntax region cssTaggedLiteral
+    exec 'syntax region litCssRegion
           \ contains=@CSSSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
           \ start=+css`+
           \ skip=+\\`+
@@ -77,9 +77,9 @@ function! htl_syntax#amend(options)
           \ '
 
     if (a:options.typescript)
-      syn cluster typescriptExpression add=cssTaggedLiteral
+      syn cluster typescriptExpression add=litCssRegion
    else
-      syn cluster jsExpression         add=cssTaggedLiteral
+      syn cluster jsExpression         add=litCssRegion
     endif
 
     " allow js interpolation (${...}) inside css attributes
