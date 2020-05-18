@@ -5,11 +5,11 @@ if (exists('g:htl_debug') && g:htl_debug == 1)
   exec 'command! HTLReload :source ' . expand('<sfile>') . ' | :edit'
 endif
 
-let s:css_templates_enabled = exists('g:htl_css_templates') && g:htl_css_templates
-
 function! htl_indent#amend(options)
   let b:htl_js                 = a:options.typescript ? '^\(typescript\|foldBraces$\)'     : '^js'
   let b:htl_expression_bracket = a:options.typescript ? '\(typescriptInterpolationDelimiter\|typescriptTemplateSB\)' : 'jsTemplateBraces'
+
+  let s:css_templates_enabled = exists('g:htl_css_templates') && g:htl_css_templates
 
   " Save the current JavaScript indentexpr.
   let b:litHtmlOriginalIndentExpression = &indentexpr
