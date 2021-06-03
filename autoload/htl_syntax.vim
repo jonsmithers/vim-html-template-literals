@@ -8,11 +8,13 @@ function! htl_syntax#amend(options)
     unlet b:current_syntax
   endif
   let g:main_syntax = 'java'
+  let g:java_css = 1
   syn include @HTMLSyntax syntax/html.vim
   unlet g:main_syntax
-  " we let/unlet g:main_syntax as a hack to prevent syntax/html.vim from
-  " re-sourcing syntax/javascript.vim. It also prevents syntax/html.vim from
-  " ovoverridding syn-sync.
+  unlet g:java_css
+  " we let/unlet g:main_syntax and g:java_css as a hack to prevent
+  " syntax/html.vim from re-sourcing syntax/javascript.vim. It also prevents
+  " syntax/html.vim from ovoverridding syn-sync.
   if exists('s:current_syntax')
     let b:current_syntax=s:current_syntax
   endif
