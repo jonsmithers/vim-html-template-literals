@@ -37,7 +37,7 @@ function! htl_syntax#amend(options)
   exec 'syntax region litHtmlRegion
         \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
         \ containedin=typescriptBlock
-        \ start=' . (l:all_templates ? '+\(html\)\?`+' : '+html`+') . '
+        \ start=' . (l:all_templates ? '+\(html\)\?`+' : '+\(\/\*\s*\)\?html\(\s*\*\/\)\?`+') . '
         \ skip=+\\`+
         \ end=+`+
         \ extend
@@ -71,7 +71,7 @@ function! htl_syntax#amend(options)
   if (l:css_templates)
     exec 'syntax region cssLiteral
           \ contains=@CSSSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
-          \ start=+css`+
+          \ start=+\(\/\*\s*\)\?css\(\s*\*\/\)\?`+
           \ skip=+\\`+
           \ end=+`+
           \ extend
