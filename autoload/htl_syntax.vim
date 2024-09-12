@@ -2,6 +2,7 @@ function! htl_syntax#amend(options)
 
   let l:css_templates = (exists('g:htl_css_templates') && g:htl_css_templates)
   let l:all_templates = (exists('g:htl_all_templates') && g:htl_all_templates)
+  let l:tag_names = (exists('g:htl_tag_names') ? g:htl_tag_names : ['html'])
 
   if exists('b:current_syntax')
     let s:current_syntax=b:current_syntax
@@ -37,7 +38,7 @@ function! htl_syntax#amend(options)
   exec 'syntax region litHtmlRegion
         \ contains=@HTMLSyntax,' . (a:options.typescript ? 'typescriptInterpolation,typescriptTemplateSubstitution' : 'jsTemplateExpression') . '
         \ containedin=typescriptBlock
-        \ start=' . (l:all_templates ? '+\(html\)\?`+' : '+html`+') . '
+        \ start=' . (l:all_templates ? '+\(' . join(l:tag_names, '\|') . '\)\?`+' : '+\(' . join(l:tag_names, '\|') . '\)`+') . '
         \ skip=+\\`+
         \ end=+`+
         \ extend
