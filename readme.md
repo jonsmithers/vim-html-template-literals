@@ -38,6 +38,7 @@ html-indenting`.
 | --------------------  | -------------------------------------------------------------------------------------------------------------------------- |
 | `g:htl_css_templates` | Enable css syntax inside css-tagged template literals (`` css`...` ``). Indentation behavior is currently not implemented. |
 | `g:htl_all_templates` | (Experimental) Enable html syntax inside _all_ template literals (`` `...` ``).                                            |
+| `g:htl_tag_names`     | (Experimental) Specify the tag names in which to enable html syntax highlighting (default `['html']`).                     |
 
 ## Known Issues
 
@@ -49,7 +50,7 @@ html-indenting`.
   region definitions are less precise and it's not easy to translate
   vim-html-template-literals indentation behavior to work with Vim's native
   typescript region definitions.
-  
+
 ## Tips
 
 - You can configure the [vim-closetag] plugin to work inside html template
